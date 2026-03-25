@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Brand CSS variables ── */
+:root {
+  --background: #F7F3EA;
+  --foreground: #111111;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  /*
+   * Form elements: explicit readable colors so inputs/labels stay legible
+   * on any light surface, regardless of OS color-scheme preference.
+   */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    color: #111111;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"])::placeholder,
+  textarea::placeholder {
+    color: theme('colors.gray.400');
+    opacity: 1;
+  }
+
+  label {
+    color: #111111;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* ── Ken Burns zoom — hero slideshow ── */
+@keyframes kenburns {
+  from { transform: scale(1);    }
+  to   { transform: scale(1.08); }
+}
+
+/* ── Shimmer skeleton animation — warm Studio Twaalf palette ── */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    #EDE6D8 0%,
+    #F7F3EA 40%,
+    #FDFBF8 50%,
+    #F7F3EA 60%,
+    #EDE6D8 100%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}

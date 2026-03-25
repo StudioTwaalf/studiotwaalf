@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <polygon points="50,8 92,50 50,92 8,50" fill="black"/>
+  <polygon points="50,20 80,50 50,80 20,50" fill="white"/>
+  <polygon points="50,32 68,50 50,68 32,50" fill="black"/>
+  <polygon points="50,44 56,50 50,56 44,50" fill="white"/>
+</svg>

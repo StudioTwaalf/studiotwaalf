@@ -1,0 +1,112 @@
+{
+    "document": {
+        "name": "Naamloos-1",
+        "colorSpace": "DocumentColorSpace.RGB"
+    },
+    "artboards": [
+        {
+            "index": 0,
+            "name": "Tekengebied 1",
+            "rect": {
+                "left": 0,
+                "top": 0,
+                "right": 1000,
+                "bottom": -1000,
+                "width": 1000,
+                "height": 1000
+            }
+        }
+    ],
+    "layers": [
+        {
+            "name": "afbeelding",
+            "visible": true,
+            "locked": false
+        },
+        {
+            "name": "tekst",
+            "visible": true,
+            "locked": false
+        },
+        {
+            "name": "achtergrond",
+            "visible": true,
+            "locked": false
+        }
+    ],
+    "textFrames": [
+        {
+            "name": "",
+            "contents": "welkom lieve ",
+            "kind": "TextType.AREATEXT",
+            "bounds": {
+                "left": 103.74,
+                "top": -373.32,
+                "right": 896.26,
+                "bottom": -405.2,
+                "width": 792.51,
+                "height": 31.88
+            },
+            "textStyle": {
+                "fontFamily": "TeX Gyre Adventor",
+                "fontStyle": "Bold",
+                "fontSize": 20,
+                "fillColor": "#FC6363"
+            },
+            "layer": "tekst"
+        },
+        {
+            "name": "",
+            "contents": "ella",
+            "kind": "TextType.AREATEXT",
+            "bounds": {
+                "left": 103.74,
+                "top": -428.79,
+                "right": 896.26,
+                "bottom": -626.68,
+                "width": 792.51,
+                "height": 197.89
+            },
+            "textStyle": {
+                "fontFamily": "TeX Gyre Adventor",
+                "fontStyle": "Bold",
+                "fontSize": 200,
+                "fillColor": "#FC6363"
+            },
+            "layer": "tekst"
+        }
+    ],
+    "placedItems": [],
+    "pathItems": [
+        {
+            "name": "",
+            "closed": true,
+            "stroked": false,
+            "filled": true,
+            "bounds": {
+                "left": 684.27,
+                "top": -410.65,
+                "right": 720.03,
+                "bottom": -482.07,
+                "width": 35.76,
+                "height": 71.43
+            },
+            "layer": "afbeelding"
+        },
+        {
+            "name": "",
+            "closed": true,
+            "stroked": false,
+            "filled": true,
+            "bounds": {
+                "left": 0,
+                "top": 0,
+                "right": 1000,
+                "bottom": -1000,
+                "width": 1000,
+                "height": 1000
+            },
+            "layer": "achtergrond"
+        }
+    ]
+}

@@ -1,0 +1,518 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Customer auth ───────────────────────────────────────────────────────────
+
+enum Gender {
+  M
+  V
+  X
+}
+
+enum HowHeard {
+  FRIEND
+  GOOGLE
+  SOCIAL
+  OTHER
+}
+
+model User {
+  id              String    @id @default(cuid())
+  // NextAuth required fields
+  name            String?
+  email           String    @unique
+  emailVerified   DateTime?
+  image           String?
+  hashedPassword  String?
+  // Profile
+  firstName       String?
+  lastName        String?
+  gender          Gender?
+  street          String?
+  houseNumber     String?
+  zipCode         String?
+  city            String?
+  phone           String?
+  howHeard        HowHeard?
+  howHeardOther   String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  designs       Design[]
+  offerRequests OfferRequest[]
+  shopOrders    ShopOrder[]
+  carts         Cart[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Print studio models ─────────────────────────────────────────────────────
+
+model Template {
+  id                String   @id @default(cuid())
+  name              String
+  description       String?
+  category          String?
+  tags              String[] @default([])
+  thumbnail         String?
+  previewImageUrl   String?
+  widthMm           Float?
+  heightMm          Float?
+  defaultPaperId    String?
+  defaultDesignJson Json?
+  status            String   @default("draft")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  designs       Design[]
+  offerRequests OfferRequest[]
+}
+
+model Design {
+  id            String   @id @default(cuid())
+  name          String?
+  data          Json
+  gadgets       Json?
+  quoteMetaJson Json?
+  templateId    String
+  userId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  template           Template             @relation(fields: [templateId], references: [id])
+  user               User                 @relation(fields: [userId], references: [id])
+  illustrationAssets IllustrationAsset[]
+  orders             Order[]
+  gadgetSelections   GadgetSelection[]
+  addonSelections    DesignAddonSelection[]
+  offerRequests      OfferRequest[]
+}
+
+// ─── Shop catalogue ───────────────────────────────────────────────────────────
+
+model Category {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  nameNl        String
+  descriptionNl String?
+  sortOrder     Int       @default(0)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  products  Product[]
+}
+
+model Product {
+  id               String   @id @default(cuid())
+  slug             String   @unique
+  nameNl           String
+  descriptionNl    String?
+  basePriceCents   Int
+  isPersonalizable Boolean  @default(false)
+  requiresDiyFlow  Boolean  @default(false)   // if true, webshop shows DIY redirect instead of in-shop personalization
+  diyTemplateId    String?                     // optional soft-link to Template.id for the redirect CTA
+  isActive         Boolean  @default(true)
+  sortOrder        Int      @default(0)
+  channels         String[] @default([])
+  isVisibleInDIY   Boolean  @default(true)
+  isVisibleInShop  Boolean  @default(false)
+  stockQuantity    Int?     // null = unlimited/made-to-order; 0 = out of stock; >0 = units in stock
+  mockupImageUrl   String?  // transparent PNG for mockup engine; fallback → assets[0].url
+  thumbnailImageUrl String? // display image for cards, shop, lists; fallback → assets[0].url
+  categoryId       String
+  // Extensible product config JSON.  Current shape: { quantity?: QuantityConfig, dimensions?: ProductDimensions }
+  configJson       Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  category                 Category                        @relation(fields: [categoryId], references: [id])
+  assets                   ProductAsset[]
+  options                  ProductOption[]
+  personalizationTemplates ProductPersonalizationTemplate[]
+  addonSelections          DesignAddonSelection[]
+  variants                 GadgetVariant[]
+  cartItems                CartItem[]
+}
+
+model GadgetVariant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  name      String?   // "Roze", "Wit" — display label
+  color     String?   // CSS color keyword/hex for swatch
+  sizeLabel String?   // freeform e.g. "50×130×40 mm"
+
+  widthMm   Float?    // overrides parent configJson.dimensions.widthMm
+  heightMm  Float?
+  depthMm   Float?
+
+  priceCents Int?     // null = inherit parent basePriceCents
+  isActive   Boolean @default(true)
+  isDefault  Boolean @default(false)
+  sortOrder  Int     @default(0)
+
+  thumbnailImageUrl String?
+  mockupImageUrl    String?
+
+  mockupScale   Float?
+  visualPadding Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cartItems CartItem[]
+
+  @@index([productId, sortOrder])
+}
+
+model ProductAsset {
+  id        String  @id @default(cuid())
+  productId String
+  url       String
+  altNl     String?
+  sortOrder Int     @default(0)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model ProductOption {
+  id         String  @id @default(cuid())
+  productId  String
+  nameNl     String
+  type       String  @default("DROPDOWN") // DROPDOWN | TEXT | NUMBER
+  isRequired Boolean @default(false)
+  sortOrder  Int     @default(0)
+
+  product Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
+  values  ProductOptionValue[]
+}
+
+model ProductOptionValue {
+  id              String  @id @default(cuid())
+  optionId        String
+  valueNl         String
+  priceDeltaCents Int?
+  sortOrder       Int     @default(0)
+  isActive        Boolean @default(true)
+
+  option ProductOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+}
+
+model ProductPersonalizationTemplate {
+  id                String @id @default(cuid())
+  productId         String
+  schemaJson        Json
+  previewConfigJson Json?
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model DesignAddonSelection {
+  id                     String   @id @default(cuid())
+  designId               String
+  productId              String
+  selectedOptionValueIds String[]
+  personalizationJson    Json?
+  quantity               Int      @default(1)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  design  Design  @relation(fields: [designId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([designId, productId])
+}
+
+// ─── Geboortesnoep & gadgets ──────────────────────────────────────────────────
+
+enum GadgetType {
+  STICKER
+  LABEL
+  KAARTJE
+  SLEUTELHANGER
+  MAGNEET
+  ANDERE
+}
+
+model GadgetProduct {
+  id                  String      @id @default(cuid())
+  name                String
+  type                GadgetType
+  basePriceCents      Int
+  imageUrl            String?
+  previewConfigJson   Json?
+  isActive            Boolean     @default(true)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  gadgetSelections GadgetSelection[]
+}
+
+model GadgetSelection {
+  id                  String   @id @default(cuid())
+  designId            String
+  gadgetProductId     String
+  quantity            Int      @default(1)
+  personalizationJson Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  design        Design        @relation(fields: [designId], references: [id], onDelete: Cascade)
+  gadgetProduct GadgetProduct @relation(fields: [gadgetProductId], references: [id])
+}
+
+model IllustrationAsset {
+  id        String   @id @default(cuid())
+  name      String
+  url       String
+  type      String
+  tags      String[]
+  designId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  design Design? @relation(fields: [designId], references: [id])
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  status     OrderStatus @default(PENDING)
+  quantity   Int         @default(1)
+  totalCents Int
+  designId   String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  design Design @relation(fields: [designId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  IN_PRODUCTION
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+// ─── Offer requests ───────────────────────────────────────────────────────────
+
+enum OfferRequestStatus {
+  TO_CONTACT        // legacy — maps to "Offerte aangevraagd"
+  OFFER_REQUESTED   // preferred replacement for TO_CONTACT
+  SAMPLES_REQUESTED // new: customer asked for samples
+  APPOINTMENT_SET   // legacy — maps to "Afspraak gemaakt"
+  APPOINTMENT_MADE  // preferred replacement for APPOINTMENT_SET
+  SAMPLES_SENT
+  CONFIRMED
+  REJECTED
+}
+
+// Snapshot of a customer's quote request.
+// itemsJson stores product name / price at time of submission so the
+// record stays meaningful even if the product catalogue changes later.
+model OfferRequest {
+  id              String             @id @default(cuid())
+  createdAt       DateTime           @default(now())
+  status          OfferRequestStatus @default(TO_CONTACT)
+
+  // Linked user — null for future anonymous requests
+  userId          String?
+  customerEmail   String?
+  customerName    String?
+
+  templateId      String
+  designId        String
+
+  expectedDueDate DateTime?
+  notes           String?
+  currency        String             @default("EUR")
+  totalCents      Int
+
+  // JSON array of OfferRequestItem snapshots (see API route for shape)
+  itemsJson       Json
+
+  // Admin-only fields
+  internalNotes   String?
+  updatedAt       DateTime @default(now()) @updatedAt
+
+  user     User?     @relation(fields: [userId],     references: [id])
+  template Template  @relation(fields: [templateId], references: [id])
+  design   Design    @relation(fields: [designId],   references: [id])
+}
+
+// ─── Webshop ──────────────────────────────────────────────────────────────────
+
+model Cart {
+  id        String     @id @default(cuid())
+  sessionId String     @unique  // cookie st_cart_id (UUID v4)
+  userId    String?
+  user      User?      @relation(fields: [userId], references: [id])
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id             String         @id @default(cuid())
+  cartId         String
+  cart           Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product        @relation(fields: [productId], references: [id])
+  variantId      String?
+  variant        GadgetVariant? @relation(fields: [variantId], references: [id])
+  quantity       Int            @default(1)
+  unitPriceCents Int            // snapshot at add-to-cart time
+  personalization Json?         // { name?, text?, notes? }
+  optionValues   Json?          // { [optionId]: valueId }
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+enum ShopOrderStatus {
+  PENDING
+  AWAITING_PAYMENT
+  PAID
+  IN_PROGRESS
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  EXPIRED
+  REFUNDED
+}
+
+model ShopOrder {
+  id          String          @id @default(cuid())
+  orderNumber String          @unique  // "ST-2024-0001"
+
+  // Customer (snapshot + optional user link)
+  userId        String?
+  user          User?          @relation(fields: [userId], references: [id])
+  customerName  String
+  customerEmail String
+  customerPhone String?
+
+  // Shipping address (snapshot at order time)
+  shippingName    String
+  shippingStreet  String
+  shippingNumber  String
+  shippingZip     String
+  shippingCity    String
+  shippingCountry String       @default("BE")
+
+  // Pricing
+  subtotalCents Int
+  shippingCents Int            @default(0)
+  totalCents    Int
+  currency      String         @default("EUR")
+
+  // Status
+  status        ShopOrderStatus @default(PENDING)
+  paymentStatus PaymentStatus   @default(PENDING)
+
+  // Mollie
+  molliePaymentId   String?
+  mollieCheckoutUrl String?
+  paidAt            DateTime?
+
+  customerNotes String?
+  internalNotes String?
+
+  items     ShopOrderItem[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model ShopOrderItem {
+  id      String    @id @default(cuid())
+  orderId String
+  order   ShopOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // Snapshots (survive product edits/deletions)
+  productId      String
+  productName    String
+  variantName    String?
+  unitPriceCents Int
+  quantity       Int
+  totalCents     Int
+  personalization Json?
+  optionValues    Json?
+
+  createdAt DateTime @default(now())
+}
+
+// ─── Email audit log ──────────────────────────────────────────────────────────
+// One record per (type, referenceId) pair that was successfully sent.
+// Used to prevent duplicate sends (idempotency guard).
+
+model EmailLog {
+  id          String   @id @default(cuid())
+  /// e.g. "order_confirmation" | "quote_confirmation" | "welcome" | "abandoned_design" | "order_shipped"
+  type        String
+  /// The primary entity ID this email is about (orderId, offerId, userId, designId)
+  referenceId String
+  recipient   String
+  subject     String
+  /// "sent" | "failed"
+  status      String   @default("sent")
+  /// Resend message ID (populated on success)
+  resendId    String?
+  /// Error message (populated on failure)
+  error       String?
+  sentAt      DateTime @default(now())
+
+  @@index([type, referenceId])
+  @@index([sentAt])
+}

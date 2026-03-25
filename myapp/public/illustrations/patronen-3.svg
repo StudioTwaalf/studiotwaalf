@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <g transform="translate(25,25)">
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black"/>
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black" transform="rotate(90,0,0)"/>
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black" transform="rotate(180,0,0)"/>
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black" transform="rotate(270,0,0)"/>
+    <circle cx="0" cy="0" r="6" fill="black"/>
+  </g>
+  <g transform="translate(75,25)">
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black"/>
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black" transform="rotate(90,0,0)"/>
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black" transform="rotate(180,0,0)"/>
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black" transform="rotate(270,0,0)"/>
+    <circle cx="0" cy="0" r="6" fill="black"/>
+  </g>
+  <g transform="translate(25,75)">
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black"/>
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black" transform="rotate(90,0,0)"/>
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black" transform="rotate(180,0,0)"/>
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black" transform="rotate(270,0,0)"/>
+    <circle cx="0" cy="0" r="6" fill="black"/>
+  </g>
+  <g transform="translate(75,75)">
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black"/>
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black" transform="rotate(90,0,0)"/>
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black" transform="rotate(180,0,0)"/>
+    <ellipse cx="0" cy="-13" rx="6" ry="11" fill="black" transform="rotate(270,0,0)"/>
+    <circle cx="0" cy="0" r="6" fill="black"/>
+  </g>
+  <g transform="translate(50,50)">
+    <ellipse cx="0" cy="-15" rx="7" ry="12" fill="black"/>
+    <ellipse cx="0" cy="-15" rx="7" ry="12" fill="black" transform="rotate(90,0,0)"/>
+    <ellipse cx="0" cy="-15" rx="7" ry="12" fill="black" transform="rotate(180,0,0)"/>
+    <ellipse cx="0" cy="-15" rx="7" ry="12" fill="black" transform="rotate(270,0,0)"/>
+    <circle cx="0" cy="0" r="7" fill="black"/>
+  </g>
+</svg>
