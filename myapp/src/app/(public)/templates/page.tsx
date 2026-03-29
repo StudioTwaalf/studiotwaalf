@@ -1,4 +1,7 @@
 import type { Metadata } from 'next'
+
+export const dynamic = 'force-dynamic'
+
 import { prisma } from '@/lib/prisma'
 import type { TemplateSummary } from '@/components/TemplatesGrid'
 import TemplatesPageClient from '@/components/TemplatesPageClient'

@@ -1,25 +1,34 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 const BENEFITS = [
   {
     title: 'Eén aanspreekpunt',
     description: 'Van eerste gesprek tot levering begeleiden we je persoonlijk. Geen ruis, geen tussenpersonen — gewoon eerlijk contact.',
-    color: '#FFCED3',
+    image: '/images/home/hanne-vangheluwe.jpeg',
+    imageAlt: 'Hanne Vangheluwe – Studio Twaalf',
+    imageFocus: '50% 20%',
   },
   {
     title: 'Coherent van kaartje tot cadeau',
     description: 'Geboortekaartje, doopsuiker, verpakking en bijpassende cadeautjes — alles ademt dezelfde sfeer en vertelt hetzelfde verhaal.',
-    color: '#E8DCBB',
+    image: '/images/home/stock-stationery.jpg',
+    imageAlt: 'Coherent concept – Studio Twaalf',
+    imageFocus: '50% 50%',
   },
   {
     title: 'Jouw stijl, vertaald door ons',
     description: 'Je hoeft niet precies te weten wat je wil. Wij stellen de juiste vragen en vertalen jouw ideeën naar een concept dat voelt als jij.',
-    color: '#A8BFA3',
+    image: '/images/home/stock-design.jpg',
+    imageAlt: 'Stijl vertaald – Studio Twaalf',
+    imageFocus: '50% 50%',
   },
   {
     title: 'Volledig ontzorgd',
     description: 'Papierkeuze, kleurpalet, afwerking — wij denken over elk detail na zodat jij je nergens zorgen over hoeft te maken.',
-    color: '#E7C46A',
+    image: '/images/home/stock-ontzorgd.jpg',
+    imageAlt: 'Volledig ontzorgd – Studio Twaalf',
+    imageFocus: '50% 50%',
   },
 ]
 
@@ -50,16 +59,13 @@ export default function MaatwerkSection() {
               Wij denken met je mee.
             </h2>
             <p className="text-[#7A6A52] text-base leading-relaxed mb-5">
-              Wil je het liever samen aanpakken? Dat kan. Bij Studio Twaalf creëren we
-              met plezier een persoonlijk totaalconcept dat helemaal bij jou past.
+              Wil je het liever samen aanpakken? Dat kan! Ikzelf, Hanne, oprichtster van Studio Twaalf help je graag met een persoonlijk totaalconcept uit te werken dat écht bij jou past.
             </p>
             <p className="text-[#7A6A52] text-base leading-relaxed mb-5">
-              Van geboortekaartjes en huwelijksdrukwerk tot doopsuiker, verpakking en
-              gepersonaliseerde cadeautjes — alles wordt zorgvuldig op elkaar afgestemd.
+              Van geboortekaartjes en huwelijksdrukwerk tot doopsuiker, verpakking en gepersonaliseerde cadeautjes. Elk detail wordt zorgvuldig op elkaar afgestemd.
             </p>
             <p className="text-[#7A6A52] text-base leading-relaxed mb-10">
-              We begeleiden je stap voor stap, zodat het resultaat niet alleen mooi is,
-              maar ook helemaal klopt.
+              Ik begeleid je stap voor stap, zodat alles niet alleen mooi oogt, maar ook helemaal juist aanvoelt.
             </p>
 
             <div className="flex flex-wrap gap-3">
@@ -92,18 +98,26 @@ export default function MaatwerkSection() {
             {BENEFITS.map((b) => (
               <div
                 key={b.title}
-                className="bg-white border border-[#EDE7D9] rounded-2xl p-5 hover:shadow-soft transition-shadow"
+                className="bg-white border border-[#EDE7D9] rounded-2xl overflow-hidden hover:shadow-soft transition-shadow"
               >
-                <div
-                  className="w-8 h-8 rounded-lg mb-4 flex-shrink-0"
-                  style={{ background: b.color }}
-                />
-                <h3 className="text-sm font-semibold text-studio-black mb-1.5 leading-snug">
-                  {b.title}
-                </h3>
-                <p className="text-[0.8rem] text-[#8A7A6A] leading-relaxed">
-                  {b.description}
-                </p>
+                <div className="relative w-full h-36 overflow-hidden">
+                  <Image
+                    src={b.image}
+                    alt={b.imageAlt}
+                    fill
+                    className="object-cover"
+                    style={{ objectPosition: b.imageFocus }}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 280px"
+                  />
+                </div>
+                <div className="p-5">
+                  <h3 className="text-sm font-semibold text-studio-black mb-1.5 leading-snug">
+                    {b.title}
+                  </h3>
+                  <p className="text-[0.8rem] text-[#8A7A6A] leading-relaxed">
+                    {b.description}
+                  </p>
+                </div>
               </div>
             ))}
 
@@ -127,7 +141,7 @@ export default function MaatwerkSection() {
                 />
               </svg>
               <p className="text-[0.8125rem] text-[#7A6040] italic leading-relaxed">
-                &ldquo;Je hoeft het niet alleen te doen. Wij begeleiden je met zorg
+                &ldquo;Je hoeft het niet alleen te doen. Ik begeleid je met zorg
                 en oog voor elk detail — van het eerste gesprek tot de laatste sticker.&rdquo;
               </p>
             </div>

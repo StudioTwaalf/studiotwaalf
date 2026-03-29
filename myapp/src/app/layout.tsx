@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import {
   Manrope,
   Fraunces,
@@ -78,7 +79,9 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased">
         <SessionProvider>
-          <RouteChangeTracker />
+          <Suspense fallback={null}>
+            <RouteChangeTracker />
+          </Suspense>
           {children}
         </SessionProvider>
       </body>

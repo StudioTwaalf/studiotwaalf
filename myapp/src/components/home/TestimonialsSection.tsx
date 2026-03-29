@@ -5,24 +5,24 @@ const TESTIMONIALS = [
     name: 'Leonie & Niels',
     context: 'Geboortekaartje + doopsuiker',
     quote:
-      'De samenwerking verliep super vlot. Het kaartje en de doopsuiker waren prachtig uitgewerkt. Elk detail klopte.',
+      'Hanne zorgde voor een persoonlijke en professionele aanpak. Aan de hand van verschillende voorbeelden en haar creatieve aanpak maakte ze van ons idee een prachtig geboorteontwerp. Ze paste het ontwerp tot in detail aan zodat het helemaal voldeed aan onze wensen. Wij kozen voor een DIY doopsuikerpakket, Hanne koos alle items zorgvuldig uit en zorgde ervoor dat we feilloos aan de slag konden. We waren heel tevreden!',
     initial: 'L',
     color: '#FFCED3',
   },
   {
     name: 'Bieke & Olivier',
-    context: 'Huwelijksconcept',
+    context: 'Geboorteconcept',
     quote:
-      'Ons idee werd perfect vertaald naar een volledig concept. Van uitnodiging tot verpakking — alles paste perfect samen.',
+      'Ons idee werd perfect vertaald! Van uitnodiging tot de geboortesuiker en de personalisaties. Dankjewel!',
     initial: 'B',
     color: '#A8BFA3',
   },
   {
-    name: 'Jonith',
-    context: 'Geboortekaartje',
+    name: 'Bram & Amelie',
+    context: 'Huwelijksconcept',
     quote:
-      'Alles was tot in de details uitgewerkt. Echt een aanrader voor iedereen die iets bijzonders zoekt.',
-    initial: 'J',
+      'Wij contacteerden Studio Twaalf voor het maken van ons huwelijk. Het contact met Hanne verliep heel vlot en nadat we enkele voorbeelden en inspiraties toonden van wat we mooi vonden kregen we precies wat we wouden. Heel tevreden en zeker aan te raden!',
+    initial: 'B',
     color: '#E8DCBB',
   },
 ]

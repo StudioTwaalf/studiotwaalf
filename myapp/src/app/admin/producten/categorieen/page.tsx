@@ -1,6 +1,9 @@
 import Link from 'next/link'
-import { prisma } from '@/lib/prisma'
 import type { Metadata } from 'next'
+
+export const dynamic = 'force-dynamic'
+
+import { prisma } from '@/lib/prisma'
 
 export const metadata: Metadata = { title: 'Categorieën – Admin' }
 

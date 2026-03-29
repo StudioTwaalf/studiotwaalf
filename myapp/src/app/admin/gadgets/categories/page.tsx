@@ -1,4 +1,7 @@
 import Link from 'next/link'
+
+export const dynamic = 'force-dynamic'
+
 import { prisma } from '@/lib/prisma'
 
 export default async function AdminCategoriesPage() {

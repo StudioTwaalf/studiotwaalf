@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 function toSlug(str: string): string {
   return str
@@ -122,9 +123,9 @@ export async function savePersonalizationAction(id: string, formData: FormData) 
   const schemaJsonStr = (formData.get('schemaJson') as string | null)?.trim() ?? '{}'
   const isPersonalizable = formData.get('isPersonalizable') === 'on'
 
-  let schemaJson: unknown
+  let schemaJson: Prisma.InputJsonValue
   try {
-    schemaJson = JSON.parse(schemaJsonStr)
+    schemaJson = JSON.parse(schemaJsonStr) as Prisma.InputJsonValue
   } catch {
     throw new Error('Ongeldige JSON in personalisatieschema')
   }
@@ -140,7 +141,7 @@ export async function savePersonalizationAction(id: string, formData: FormData) 
   if (existing) {
     await prisma.productPersonalizationTemplate.update({
       where: { id: existing.id },
-      data: { schemaJson },
+      data: { schemaJson: schemaJson as any },
     })
   } else {
     await prisma.productPersonalizationTemplate.create({
