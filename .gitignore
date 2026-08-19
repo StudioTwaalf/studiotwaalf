@@ -1,0 +1,5 @@
+.DS_Store
+
+# Database-dumps horen niet in git — die bevatten klantgegevens
+*.sql
+!myapp/prisma/migrations/**/*.sql

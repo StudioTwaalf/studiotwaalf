@@ -143,6 +143,10 @@ model Category {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  parentId  String?
+  parent    Category?  @relation("CategoryChildren", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryChildren")
+
   products  Product[]
 }
 
@@ -515,4 +519,70 @@ model EmailLog {
 
   @@index([type, referenceId])
   @@index([sentAt])
+}
+
+// ─── Digitale wegwerpcamera ──────────────────────────────────────────────────
+// Gasten scannen een QR-code op tafel, checken in met naam + e-mail en krijgen
+// een beperkt "filmpje" (standaard 20 foto's).  Zie src/lib/wedding/.
+
+model WeddingEvent {
+  id          String    @id @default(cuid())
+  /// Zit in de QR-code: /w/<slug>
+  slug        String    @unique
+  coupleName  String
+  eventDate   DateTime
+  /// Aantal foto's per gast — het "filmpje"
+  photoLimit  Int       @default(20)
+  /// Foto's worden pas "ontwikkeld" (publiek zichtbaar) vanaf dit moment.
+  /// null = galerij blijft gesloten tot het koppel hem opent.
+  revealAt    DateTime?
+  /// Staat het inchecken en fotograferen open?
+  isOpen      Boolean   @default(true)
+  /// Vrije tekst onderaan het check-in scherm (AVG-melding, uitleg)
+  welcomeText String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  guests WeddingGuest[]
+  photos WeddingPhoto[]
+
+  @@index([eventDate])
+}
+
+model WeddingGuest {
+  id      String @id @default(cuid())
+  eventId String
+  name    String
+  /// Niet geverifieerd — enkel om de foto's achteraf te kunnen nasturen
+  email   String?
+  /// Server-side teller; de bron van waarheid voor de limiet
+  photoCount Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  event  WeddingEvent   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  photos WeddingPhoto[]
+
+  @@index([eventId])
+}
+
+model WeddingPhoto {
+  id       String @id @default(cuid())
+  eventId  String
+  guestId  String
+  url      String
+  width    Int    @default(0)
+  height   Int    @default(0)
+  sizeBytes Int   @default(0)
+  /// Verborgen door het koppel (moderatie) — telt wel nog mee voor de limiet
+  isHidden Boolean  @default(false)
+  takenAt  DateTime @default(now())
+  /// Client-side id uit de upload-wachtrij; voorkomt dubbels bij retries
+  clientId String?
+
+  event WeddingEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  guest WeddingGuest @relation(fields: [guestId], references: [id], onDelete: Cascade)
+
+  @@unique([guestId, clientId])
+  @@index([eventId, takenAt])
+  @@index([guestId])
 }

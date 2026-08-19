@@ -11,6 +11,7 @@
 import crypto from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
+import { put } from '@vercel/blob'
 
 // ── Public types ───────────────────────────────────────────────────────────────
 
@@ -45,6 +46,32 @@ class LocalStorageProvider implements StorageProvider {
 
     return {
       url: `/uploads/${name}`,
+      mimeType,
+      sizeBytes: buffer.length,
+    }
+  }
+}
+
+// ── Vercel Blob provider (activates when BLOB_READ_WRITE_TOKEN is present) ─────
+
+class VercelBlobProvider implements StorageProvider {
+  private folder: string
+
+  constructor() {
+    this.folder = process.env.VERCEL_BLOB_FOLDER ?? 'uploads'
+  }
+
+  async upload(buffer: Buffer, filename: string, mimeType: string): Promise<UploadResult> {
+    const safe = filename.replace(/[^a-zA-Z0-9._-]/g, '_')
+    const pathname = `${this.folder}/${Date.now()}-${safe}`
+
+    const blob = await put(pathname, buffer, {
+      access: 'public',
+      contentType: mimeType,
+    })
+
+    return {
+      url: blob.url,
       mimeType,
       sizeBytes: buffer.length,
     }
@@ -121,7 +148,7 @@ let _provider: StorageProvider | null = null
 export function getStorageProvider(): StorageProvider {
   if (_provider) return _provider
 
-  const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env
+  const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, BLOB_READ_WRITE_TOKEN } = process.env
 
   if (CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET) {
     _provider = new CloudinaryProvider(
@@ -130,6 +157,9 @@ export function getStorageProvider(): StorageProvider {
       CLOUDINARY_API_SECRET,
     )
     console.log('[storage] Using Cloudinary provider')
+  } else if (BLOB_READ_WRITE_TOKEN) {
+    _provider = new VercelBlobProvider()
+    console.log('[storage] Using Vercel Blob provider')
   } else {
     _provider = new LocalStorageProvider()
     if (process.env.NODE_ENV !== 'test') {

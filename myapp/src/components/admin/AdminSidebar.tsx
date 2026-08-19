@@ -179,6 +179,21 @@ export default function AdminSidebar() {
           Offertes
         </Link>
 
+        {/* Divider */}
+        <div className="mx-1 my-2 border-t border-white/[0.06]" />
+
+        {/* Wegwerpcamera's — QR op tafel, gasten fotograferen */}
+        <Link
+          href="/admin/huwelijken"
+          className={[baseItem, isActive('/admin/huwelijken') ? activeItem : inactiveItem].join(' ')}
+        >
+          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 8.5A1.5 1.5 0 014.5 7h2.2l1.2-2h8.2l1.2 2h2.2A1.5 1.5 0 0121 8.5v9A1.5 1.5 0 0119.5 19h-15A1.5 1.5 0 013 17.5v-9z" />
+            <circle cx="12" cy="13" r="3.2" />
+          </svg>
+          Wegwerpcamera&apos;s
+        </Link>
+
       </nav>
 
       {/* ── Divider ────────────────────────────────────────────────────── */}

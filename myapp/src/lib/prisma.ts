@@ -24,7 +24,7 @@ import { PrismaClient } from '@prisma/client'
 
 // Required model delegates — any name listed here must exist on PrismaClient
 // after the most recent schema update.  Add new ones when you add new models.
-const REQUIRED_MODELS = ['product', 'category', 'designAddonSelection', 'cart', 'shopOrder'] as const
+const REQUIRED_MODELS = ['product', 'category', 'designAddonSelection', 'cart', 'shopOrder', 'weddingEvent'] as const
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
