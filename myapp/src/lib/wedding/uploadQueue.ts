@@ -32,6 +32,13 @@ export interface QueueState {
   sending: boolean
   /** Laatste foutmelding die de gast mag zien (null = niets aan de hand) */
   error: string | null
+  /**
+   * Gezet zodra dezelfde foto er meermaals niet door komt. Een enkele
+   * mislukking is normaal op een slecht netwerk en verdient geen melding,
+   * maar stil blijven proberen terwijl er structureel iets stuk is, is het
+   * ergste wat deze app kan doen: de gast denkt dan dat het goed komt.
+   */
+  waarschuwing: string | null
 }
 
 // ── IndexedDB helpers ────────────────────────────────────────────────────────
@@ -77,7 +84,7 @@ const allItems = () => tx<QueueItem[]>('readonly', (s) => s.getAll() as IDBReque
 type Listener = (state: QueueState) => void
 
 const listeners = new Set<Listener>()
-let state: QueueState = { pending: 0, sending: false, error: null }
+let state: QueueState = { pending: 0, sending: false, error: null, waarschuwing: null }
 let flushing = false
 let started = false
 
@@ -152,7 +159,19 @@ export async function flush(): Promise<void> {
       }
 
       // 'retry' — bewaren, teller ophogen en later opnieuw proberen
-      await putItem({ ...item, attempts: item.attempts + 1 })
+      const pogingen = item.attempts + 1
+      await putItem({ ...item, attempts: pogingen })
+
+      // Drie mislukte pogingen op rij: dit is geen netwerkhapering meer.
+      // De foto's blijven veilig op het toestel staan en we blijven proberen,
+      // maar de gast hoort te weten dat er iets niet klopt.
+      if (pogingen >= 3) {
+        emit({
+          waarschuwing:
+            'Je foto\u2019s kunnen nu niet verstuurd worden. Ze staan veilig op je toestel ' +
+            'en gaan automatisch door zodra het weer lukt \u2014 hou deze pagina open.',
+        })
+      }
 
       // Oplopende wachttijd, afgetopt op 30s.  We stoppen deze ronde: de
       // volgende trigger (online / tab actief / nieuwe foto) pakt het weer op.
@@ -189,7 +208,7 @@ async function send(item: QueueItem): Promise<Outcome> {
   }
 
   if (res.ok) {
-    emit({ error: null })
+    emit({ error: null, waarschuwing: null })
     return 'done'
   }
 

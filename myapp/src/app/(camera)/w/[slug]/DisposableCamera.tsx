@@ -55,7 +55,7 @@ export default function DisposableCamera({
   const [facing, setFacing] = useState<'environment' | 'user'>('environment')
   const [taken, setTaken] = useState(initialCount)
   const [flash, setFlash] = useState(false)
-  const [queue, setQueue] = useState<QueueState>({ pending: 0, sending: false, error: null })
+  const [queue, setQueue] = useState<QueueState>({ pending: 0, sending: false, error: null, waarschuwing: null })
 
   const remaining = Math.max(0, photoLimit - taken)
 
@@ -285,13 +285,19 @@ export default function DisposableCamera({
       </div>
 
       {/* Status van de wachtrij */}
-      {(queue.pending > 0 || queue.error) && (
+      {(queue.pending > 0 || queue.error || queue.waarschuwing) && (
         <div className="absolute inset-x-0 top-24 flex justify-center px-5">
-          <p className="rounded-full bg-studio-black/70 px-4 py-1.5 text-xs text-studio-beige/80 backdrop-blur">
-            {queue.error
-              ? queue.error
-              : `${queue.pending} foto${queue.pending === 1 ? '' : "'s"} worden verstuurd…`}
-          </p>
+          {queue.waarschuwing ? (
+            <p className="max-w-xs rounded-xl border border-studio-yellow/40 bg-studio-black/85 px-4 py-2.5 text-center text-xs leading-relaxed text-studio-yellow backdrop-blur">
+              {queue.waarschuwing}
+            </p>
+          ) : (
+            <p className="rounded-full bg-studio-black/70 px-4 py-1.5 text-xs text-studio-beige/80 backdrop-blur">
+              {queue.error
+                ? queue.error
+                : `${queue.pending} foto${queue.pending === 1 ? '' : "'s"} worden verstuurd…`}
+            </p>
+          )}
         </div>
       )}
 
@@ -478,12 +484,16 @@ function FilmFinished({
         zelf zodra ze ontwikkeld zijn.
       </p>
 
-      {queue.pending > 0 && (
+      {queue.waarschuwing ? (
+        <p className="mt-6 max-w-xs rounded-xl border border-studio-yellow/40 px-4 py-2.5 text-xs leading-relaxed text-studio-yellow">
+          {queue.waarschuwing}
+        </p>
+      ) : queue.pending > 0 ? (
         <p className="mt-6 animate-pulse text-xs text-studio-beige/50">
           Nog {queue.pending} foto{queue.pending === 1 ? '' : "'s"} aan het versturen — hou deze
           pagina nog even open.
         </p>
-      )}
+      ) : null}
     </div>
   )
 }
