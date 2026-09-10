@@ -61,8 +61,8 @@ export default async function WeddingCameraPage({ params }: { params: { slug: st
   if (!event.isOpen) {
     return (
       <Shell coupleName={event.coupleName}>
-        <h1 className="font-serif text-2xl text-white">Het feest is voorbij</h1>
-        <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/60">
+        <h1 className="font-serif text-2xl text-studio-beige">Het feest is voorbij</h1>
+        <p className="mt-3 max-w-sm text-sm leading-relaxed text-studio-beige/60">
           De camera van {event.coupleName} is gesloten. Bedankt om mee te fotograferen.
         </p>
       </Shell>
@@ -89,9 +89,9 @@ export default async function WeddingCameraPage({ params }: { params: { slug: st
 
   return (
     <Shell coupleName={event.coupleName}>
-      <p className="text-[11px] uppercase tracking-[0.3em] text-white/40">{dateLabel}</p>
-      <h1 className="mt-3 font-serif text-4xl leading-tight text-white">{event.coupleName}</h1>
-      <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/60">
+      <p className="text-[11px] uppercase tracking-[0.3em] text-studio-beige/45">{dateLabel}</p>
+      <h1 className="mt-3 font-serif text-4xl leading-tight text-studio-beige">{event.coupleName}</h1>
+      <p className="mt-5 max-w-sm text-sm leading-relaxed text-studio-beige/60">
         Je krijgt een filmpje van {event.photoLimit} foto&apos;s. Je ziet ze niet meteen terug —
         net als bij een echte wegwerpcamera worden ze pas later ontwikkeld.
       </p>
@@ -114,9 +114,9 @@ export default async function WeddingCameraPage({ params }: { params: { slug: st
 
 function Shell({ coupleName, children }: { coupleName: string; children: React.ReactNode }) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-black px-7 py-14 text-center">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-studio-black px-7 py-14 text-center">
       <div className="flex w-full max-w-sm flex-col items-center">{children}</div>
-      <p className="mt-14 text-[10px] uppercase tracking-[0.25em] text-white/20">
+      <p className="mt-14 text-[10px] uppercase tracking-[0.25em] text-studio-beige/25">
         {coupleName} · Studio Twaalf
       </p>
     </main>

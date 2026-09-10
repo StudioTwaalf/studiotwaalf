@@ -27,8 +27,8 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
     scope: `/w/${event.slug}`,
     display: 'standalone',
     orientation: 'portrait',
-    background_color: '#000000',
-    theme_color: '#000000',
+    background_color: '#111111',
+    theme_color: '#111111',
     icons: [
       { src: '/camera/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
       { src: '/camera/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },

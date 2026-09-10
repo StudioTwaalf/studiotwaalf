@@ -126,6 +126,22 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
     await releaseSlot()
     const msg = err instanceof Error ? err.message : String(err)
     console.error('[wedding/photo] upload mislukt:', msg)
-    return NextResponse.json({ error: 'Uploaden mislukt' }, { status: 500 })
+
+    // Korte code mee terug: zonder dat blijft de wachtrij eindeloos opnieuw
+    // proberen en ziet niemand waaróm het niet lukt.
+    const code =
+      err instanceof Prisma.PrismaClientKnownRequestError
+        ? err.code
+        : /BlobAccessError|token/i.test(msg)
+          ? 'BLOB_TOKEN'
+          : /BlobStoreNotFound|store/i.test(msg)
+            ? 'BLOB_STORE'
+            : /access/i.test(msg)
+              ? 'BLOB_ACCESS'
+              : err instanceof Error
+                ? err.name
+                : 'onbekend'
+
+    return NextResponse.json({ error: 'Uploaden mislukt', code }, { status: 500 })
   }
 }

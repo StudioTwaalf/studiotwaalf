@@ -75,7 +75,27 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Alleen de slugs en namen van de feesten: geen gasten, geen e-mailadressen,
+  // geen foto's. Genoeg om te kunnen testen, niets persoonlijks.
+  let feesten: unknown = null
+  try {
+    feesten = await prisma.weddingEvent.findMany({
+      select: {
+        slug: true,
+        coupleName: true,
+        isOpen: true,
+        photoLimit: true,
+        _count: { select: { guests: true, photos: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 20,
+    })
+  } catch {
+    feesten = 'niet op te halen'
+  }
+
   return NextResponse.json({
+    feesten,
     DATABASE_URL: shape(process.env.DATABASE_URL ?? ''),
     DIRECT_URL: shape(process.env.DIRECT_URL ?? ''),
     NEXTAUTH_SECRET: { aanwezig: (process.env.NEXTAUTH_SECRET ?? '').length > 0 },

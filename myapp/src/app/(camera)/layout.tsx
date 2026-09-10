@@ -5,16 +5,16 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-// Fullscreen op mobiel: geen zoom, notch-veilig, donkere statusbalk
+// Fullscreen op mobiel: geen zoom, notch-veilig, statusbalk in ons eigen zwart
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
-  themeColor: '#000000',
+  themeColor: '#111111',
 }
 
 export default function CameraLayout({ children }: { children: React.ReactNode }) {
-  return <div className="min-h-screen bg-black">{children}</div>
+  return <div className="min-h-screen bg-studio-black">{children}</div>
 }

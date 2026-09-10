@@ -82,20 +82,20 @@ export default function InstallHint() {
   if (!toonIosUitleg && !prompt) return null
 
   return (
-    <div className="mt-10 w-full max-w-sm rounded-xl border border-white/15 bg-white/[0.04] p-4 text-left">
+    <div className="mt-10 w-full max-w-sm rounded-xl border border-studio-beige/20 bg-studio-beige/[0.05] p-4 text-left">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm text-white/85">Zet de camera op je beginscherm</p>
+        <p className="text-sm text-studio-beige/85">Zet de camera op je beginscherm</p>
         <button
           type="button"
           onClick={sluit}
           aria-label="Verberg deze tip"
-          className="-mt-1 shrink-0 px-1 text-lg leading-none text-white/40 hover:text-white/70"
+          className="-mt-1 shrink-0 px-1 text-lg leading-none text-studio-beige/40 hover:text-studio-beige/70"
         >
           ×
         </button>
       </div>
 
-      <p className="mt-1.5 text-xs leading-relaxed text-white/50">
+      <p className="mt-1.5 text-xs leading-relaxed text-studio-beige/50">
         Dan kan je hem later gewoon terug openen, zonder de QR-code opnieuw te scannen.
       </p>
 
@@ -103,15 +103,15 @@ export default function InstallHint() {
         <button
           type="button"
           onClick={installeer}
-          className="mt-3 w-full rounded-full bg-white py-2.5 text-sm font-medium text-black"
+          className="mt-3 w-full rounded-full bg-studio-yellow py-2.5 text-sm font-medium text-studio-black"
         >
           Toevoegen
         </button>
       ) : (
-        <p className="mt-3 text-xs leading-relaxed text-white/60">
-          Tik onderaan op <span className="text-white">Deel</span>{' '}
+        <p className="mt-3 text-xs leading-relaxed text-studio-beige/60">
+          Tik onderaan op <span className="text-studio-beige">Deel</span>{' '}
           <span aria-hidden>􀈂</span> en kies{' '}
-          <span className="text-white">Zet op beginscherm</span>.
+          <span className="text-studio-beige">Zet op beginscherm</span>.
         </p>
       )}
     </div>

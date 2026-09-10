@@ -253,7 +253,7 @@ export default function DisposableCamera({
 
   // ── De zoeker ──────────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 bg-black text-white overflow-hidden select-none">
+    <div className="fixed inset-0 bg-studio-black text-studio-beige overflow-hidden select-none">
       <video
         ref={videoRef}
         playsInline
@@ -274,20 +274,20 @@ export default function DisposableCamera({
       {/* Bovenbalk */}
       <div className="absolute inset-x-0 top-0 flex items-start justify-between p-5">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-white/60">{coupleName}</p>
-          <p className="text-sm text-white/90">Hallo {guestName}</p>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-studio-beige/60">{coupleName}</p>
+          <p className="text-sm text-studio-beige/90">Hallo {guestName}</p>
         </div>
 
-        <div className="rounded-full bg-black/50 px-3 py-1.5 text-right backdrop-blur">
-          <p className="font-mono text-2xl leading-none text-[#FF7A18]">{remaining}</p>
-          <p className="text-[10px] uppercase tracking-widest text-white/60">nog over</p>
+        <div className="rounded-full bg-studio-black/60 px-3 py-1.5 text-right backdrop-blur">
+          <p className="font-mono text-2xl leading-none text-[#E7C46A]">{remaining}</p>
+          <p className="text-[10px] uppercase tracking-widest text-studio-beige/60">nog over</p>
         </div>
       </div>
 
       {/* Status van de wachtrij */}
       {(queue.pending > 0 || queue.error) && (
         <div className="absolute inset-x-0 top-24 flex justify-center px-5">
-          <p className="rounded-full bg-black/60 px-4 py-1.5 text-xs text-white/80 backdrop-blur">
+          <p className="rounded-full bg-studio-black/70 px-4 py-1.5 text-xs text-studio-beige/80 backdrop-blur">
             {queue.error
               ? queue.error
               : `${queue.pending} foto${queue.pending === 1 ? '' : "'s"} worden verstuurd…`}
@@ -312,15 +312,15 @@ export default function DisposableCamera({
           type="button"
           onClick={() => setFacing((f) => (f === 'environment' ? 'user' : 'environment'))}
           aria-label="Wissel camera"
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-black/50 text-xl backdrop-blur active:scale-90"
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-studio-black/60 text-xl backdrop-blur active:scale-90"
         >
           ⟲
         </button>
       </div>
 
       {status === 'starting' && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black">
-          <p className="animate-pulse text-sm tracking-widest text-white/60">CAMERA STARTEN…</p>
+        <div className="absolute inset-0 flex items-center justify-center bg-studio-black">
+          <p className="animate-pulse text-sm tracking-widest text-studio-beige/60">CAMERA STARTEN…</p>
         </div>
       )}
     </div>
@@ -380,9 +380,9 @@ function stampDate(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.font = `${size}px "Courier New", ui-monospace, monospace`
   ctx.textAlign = 'right'
   ctx.textBaseline = 'bottom'
-  ctx.shadowColor = 'rgba(255, 122, 24, 0.85)'
+  ctx.shadowColor = 'rgba(231, 196, 106, 0.9)'
   ctx.shadowBlur = size * 0.55
-  ctx.fillStyle = '#FF8A2B'
+  ctx.fillStyle = '#E7C46A'
   ctx.fillText(text, w - margin, h - margin)
   ctx.fillText(text, w - margin, h - margin) // tweede keer = feller
   ctx.restore()
@@ -412,22 +412,22 @@ function NoCameraFallback({
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-black px-8 text-center text-white">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-studio-black px-8 text-center text-studio-beige">
       <h1 className="font-serif text-2xl">Even iets anders</h1>
 
       {inApp ? (
-        <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/70">
+        <p className="mt-4 max-w-sm text-sm leading-relaxed text-studio-beige/70">
           Je opende deze pagina vanuit een app (Instagram of Facebook). Die laat de camera
-          niet toe. Tik rechtsboven op <span className="text-white">•••</span> en kies{' '}
-          <span className="text-white">Open in {isIos() ? 'Safari' : 'Chrome'}</span>.
+          niet toe. Tik rechtsboven op <span className="text-studio-beige">•••</span> en kies{' '}
+          <span className="text-studio-beige">Open in {isIos() ? 'Safari' : 'Chrome'}</span>.
         </p>
       ) : status === 'denied' ? (
-        <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/70">
+        <p className="mt-4 max-w-sm text-sm leading-relaxed text-studio-beige/70">
           We mogen je camera niet gebruiken. Zet dat aan in je browserinstellingen en herlaad
           deze pagina — of kies hieronder een foto van je toestel.
         </p>
       ) : (
-        <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/70">
+        <p className="mt-4 max-w-sm text-sm leading-relaxed text-studio-beige/70">
           Je browser ondersteunt de camera hier niet. Je kan wel gewoon een foto kiezen.
         </p>
       )}
@@ -448,7 +448,7 @@ function NoCameraFallback({
       <button
         type="button"
         onClick={() => window.location.reload()}
-        className="mt-4 text-xs uppercase tracking-widest text-white/50 underline"
+        className="mt-4 text-xs uppercase tracking-widest text-studio-beige/50 underline"
       >
         Opnieuw proberen
       </button>
@@ -468,18 +468,18 @@ function FilmFinished({
   queue: QueueState
 }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-black px-8 text-center text-white">
-      <p className="font-mono text-6xl text-[#FF7A18]">{photoLimit}</p>
-      <p className="mt-2 text-[11px] uppercase tracking-[0.3em] text-white/50">foto&apos;s gemaakt</p>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-studio-black px-8 text-center text-studio-beige">
+      <p className="font-mono text-6xl text-[#E7C46A]">{photoLimit}</p>
+      <p className="mt-2 text-[11px] uppercase tracking-[0.3em] text-studio-beige/50">foto&apos;s gemaakt</p>
 
       <h1 className="mt-8 font-serif text-2xl">Je filmpje zit vol</h1>
-      <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/70">
+      <p className="mt-3 max-w-sm text-sm leading-relaxed text-studio-beige/70">
         Bedankt om mee te fotograferen. {coupleName} krijgt al je foto&apos;s — en je ziet ze
         zelf zodra ze ontwikkeld zijn.
       </p>
 
       {queue.pending > 0 && (
-        <p className="mt-6 animate-pulse text-xs text-white/50">
+        <p className="mt-6 animate-pulse text-xs text-studio-beige/50">
           Nog {queue.pending} foto{queue.pending === 1 ? '' : "'s"} aan het versturen — hou deze
           pagina nog even open.
         </p>

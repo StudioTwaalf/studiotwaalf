@@ -6,6 +6,14 @@ import { useRouter } from 'next/navigation'
 /**
  * Check-in: naam verplicht, e-mail optioneel en niet geverifieerd.
  * Eén scherm, één knop — elke extra stap kost je gasten.
+ *
+ * Let op de uitroeptekens bij de tekstkleur van de invoervelden. In
+ * globals.css staat een globale regel die álle inputs op #111111 zet:
+ *
+ *   input:not([type="checkbox"]):not([type="radio"]):not([type="range"])
+ *
+ * Die drie :not()'s maken hem specifieker dan een gewone Tailwind-klasse,
+ * dus zonder `!` typt de gast zwart op zwart.
  */
 export default function CheckInForm({
   slug,
@@ -21,6 +29,11 @@ export default function CheckInForm({
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+
+  const veld =
+    'mt-2 w-full rounded-lg border border-studio-beige/25 bg-studio-beige/[0.06] px-4 py-3 ' +
+    '!text-studio-beige placeholder:!text-studio-beige/35 outline-none ' +
+    'focus:border-studio-yellow/70 focus:bg-studio-beige/10'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -50,7 +63,7 @@ export default function CheckInForm({
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-sm">
-      <label className="block text-[11px] uppercase tracking-[0.2em] text-white/50">
+      <label className="block text-[11px] uppercase tracking-[0.2em] text-studio-beige/55">
         Je naam
       </label>
       <input
@@ -61,11 +74,12 @@ export default function CheckInForm({
         maxLength={80}
         autoComplete="name"
         placeholder="Marie Peeters"
-        className="mt-2 w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-white/30 outline-none focus:border-white/50"
+        className={veld}
       />
 
-      <label className="mt-5 block text-[11px] uppercase tracking-[0.2em] text-white/50">
-        E-mail <span className="normal-case tracking-normal text-white/30">— optioneel</span>
+      <label className="mt-5 block text-[11px] uppercase tracking-[0.2em] text-studio-beige/55">
+        E-mail{' '}
+        <span className="normal-case tracking-normal text-studio-beige/35">— optioneel</span>
       </label>
       <input
         value={email}
@@ -74,24 +88,24 @@ export default function CheckInForm({
         maxLength={160}
         autoComplete="email"
         placeholder="marie@voorbeeld.be"
-        className="mt-2 w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-white/30 outline-none focus:border-white/50"
+        className={veld}
       />
-      <p className="mt-2 text-xs text-white/40">
+      <p className="mt-2 text-xs text-studio-beige/45">
         Zo kunnen we je de foto&apos;s nasturen zodra ze ontwikkeld zijn.
       </p>
 
-      {error && <p className="mt-4 text-sm text-[#FF7A18]">{error}</p>}
+      {error && <p className="mt-4 text-sm text-studio-yellow">{error}</p>}
 
       <button
         type="submit"
         disabled={busy || name.trim().length < 2}
-        className="mt-8 w-full rounded-full bg-white py-4 text-sm font-medium text-black transition disabled:opacity-40"
+        className="mt-8 w-full rounded-full bg-studio-yellow py-4 text-sm font-medium text-studio-black transition disabled:opacity-35"
       >
         {busy ? 'Even geduld…' : `Geef me mijn ${photoLimit} foto's`}
       </button>
 
       {welcomeText && (
-        <p className="mt-8 whitespace-pre-line text-center text-xs leading-relaxed text-white/40">
+        <p className="mt-8 whitespace-pre-line text-center text-xs leading-relaxed text-studio-beige/40">
           {welcomeText}
         </p>
       )}
