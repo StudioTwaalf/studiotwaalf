@@ -122,7 +122,14 @@ export async function GET(req: NextRequest) {
     DATABASE_URL: shape(process.env.DATABASE_URL ?? ''),
     DIRECT_URL: shape(process.env.DIRECT_URL ?? ''),
     NEXTAUTH_SECRET: { aanwezig: (process.env.NEXTAUTH_SECRET ?? '').length > 0 },
-    BLOB_READ_WRITE_TOKEN: { aanwezig: (process.env.BLOB_READ_WRITE_TOKEN ?? '').length > 0 },
+    BLOB_READ_WRITE_TOKEN: {
+      aanwezig: (process.env.BLOB_READ_WRITE_TOKEN ?? '').length > 0,
+      // Een token ziet eruit als vercel_blob_rw_<opslagId>_<geheim>. Het
+      // opslag-id is niet geheim — het staat in elke publieke blob-URL — en
+      // laat zien bij wélke opslag deze token hoort.
+      opslagId: (process.env.BLOB_READ_WRITE_TOKEN ?? '').split('_')[3] ?? null,
+    },
+    BLOB_STORE_ID: { waarde: process.env.BLOB_STORE_ID ?? null },
     verbinding,
   })
 }
