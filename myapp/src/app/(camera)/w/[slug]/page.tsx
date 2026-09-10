@@ -1,11 +1,44 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { getGuestFromCookies } from '@/lib/wedding/guest'
 import CheckInForm from './CheckInForm'
 import DisposableCamera from './DisposableCamera'
+import InstallHint from './InstallHint'
 
 // De cookie bepaalt wat je ziet, dus nooit cachen
 export const dynamic = 'force-dynamic'
+
+// Maakt de camera installeerbaar op het beginscherm van de gast: eigen
+// manifest per feest, en de iOS-specifieke tags die Safari nodig heeft om
+// hem als app te openen in plaats van als tabblad.
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string }
+}): Promise<Metadata> {
+  const event = await prisma.weddingEvent.findUnique({
+    where: { slug: params.slug },
+    select: { coupleName: true },
+  })
+
+  const naam = event?.coupleName ?? 'Wegwerpcamera'
+
+  return {
+    title: naam,
+    manifest: `/w/${params.slug}/manifest`,
+    robots: { index: false, follow: false },
+    appleWebApp: {
+      capable: true,
+      title: naam,
+      statusBarStyle: 'black-translucent',
+    },
+    icons: {
+      icon: [{ url: '/camera/icon-192.png', sizes: '192x192', type: 'image/png' }],
+      apple: [{ url: '/camera/icon-180.png', sizes: '180x180', type: 'image/png' }],
+    },
+  }
+}
 
 export default async function WeddingCameraPage({ params }: { params: { slug: string } }) {
   const event = await prisma.weddingEvent.findUnique({
@@ -70,6 +103,11 @@ export default async function WeddingCameraPage({ params }: { params: { slug: st
           welcomeText={event.welcomeText}
         />
       </div>
+
+      {/* Vóór het inchecken, niet erna: op iOS krijgt de app vanaf het
+          beginscherm zijn eigen opslag en zou de gast anders opnieuw
+          moeten inchecken. */}
+      <InstallHint />
     </Shell>
   )
 }
