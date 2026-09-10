@@ -47,7 +47,16 @@ export async function GET(req: NextRequest) {
                   ? 'PGBOUNCER'
                   : 'ANDERS'
 
-    verbinding = { ok: false, soort, eersteRegel: msg.split('\n')[0].slice(0, 200) }
+    // Prisma-berichten beginnen vaak met een witregel; normaliseer alle
+    // witruimte zodat de kern van de melding overblijft.
+    const kern = msg.replace(/\s+/g, ' ').trim()
+
+    verbinding = {
+      ok: false,
+      soort,
+      melding: kern.slice(0, 400),
+      naam: err instanceof Error ? err.name : null,
+    }
   }
 
   return NextResponse.json({
