@@ -14,6 +14,9 @@ function shape(v: string) {
     lengte: v.length,
     protocolOk: v.startsWith('postgresql://') || v.startsWith('postgres://'),
     bevatPlaceholder: /YOUR-PASSWORD/i.test(v),
+    // Gebruikersnaam is niet geheim (bevat de publieke project-ref); het
+    // wachtwoord erachter tonen we uiteraard niet.
+    gebruiker: (v.match(/:\/\/([^:@/]+)/) ?? [])[1] ?? null,
     host: (v.match(/@([^/:?]+)/) ?? [])[1] ?? null,
     poort: (v.match(/@[^/:?]+:(\d+)/) ?? [])[1] ?? null,
     pgbouncer: /pgbouncer=true/.test(v),
