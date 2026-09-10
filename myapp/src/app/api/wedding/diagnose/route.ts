@@ -9,9 +9,22 @@ import { prisma } from '@/lib/prisma'
 const KEY = '3b7e13ce214ab7aef39c0c322aa7931f'
 
 function shape(v: string) {
+  // Wachtwoord = alles tussen de eerste ':' na het protocol en de laatste '@'.
+  // We tonen het nooit; enkel de lengte en wélke niet-alfanumerieke tekens
+  // erin zitten, want juist die breken de verbindingsstring.
+  const zonderProtocol = v.replace(/^postgres(?:ql)?:\/\//, '')
+  const laatsteApenstaart = zonderProtocol.lastIndexOf('@')
+  const userinfo = laatsteApenstaart > -1 ? zonderProtocol.slice(0, laatsteApenstaart) : ''
+  const eersteDubbelepunt = userinfo.indexOf(':')
+  const wachtwoord = eersteDubbelepunt > -1 ? userinfo.slice(eersteDubbelepunt + 1) : ''
+
   return {
     aanwezig: v.length > 0,
     lengte: v.length,
+    wachtwoordLengte: wachtwoord.length,
+    wachtwoordVreemdeTekens: Array.from(
+      new Set(wachtwoord.split('').filter((c) => !/[A-Za-z0-9]/.test(c))),
+    ),
     protocolOk: v.startsWith('postgresql://') || v.startsWith('postgres://'),
     bevatPlaceholder: /YOUR-PASSWORD/i.test(v),
     // Gebruikersnaam is niet geheim (bevat de publieke project-ref); het
