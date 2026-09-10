@@ -75,6 +75,28 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Probeert écht naar de Blob-opslag te schrijven. Zonder deze test weten we
+  // alleen dát het misgaat, niet waarom: de token kan naar een verwijderde
+  // opslag wijzen, verlopen zijn, of bij het verkeerde project horen.
+  let blob: Record<string, unknown>
+  try {
+    const { put } = await import('@vercel/blob')
+    const resultaat = await put(`diagnose/${Date.now()}.txt`, 'test', {
+      access: 'public',
+      contentType: 'text/plain',
+    })
+    blob = { ok: true, url: resultaat.url }
+  } catch (err) {
+    blob = {
+      ok: false,
+      naam: err instanceof Error ? err.name : null,
+      melding: (err instanceof Error ? err.message : String(err))
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 300),
+    }
+  }
+
   // Alleen de slugs en namen van de feesten: geen gasten, geen e-mailadressen,
   // geen foto's. Genoeg om te kunnen testen, niets persoonlijks.
   let feesten: unknown = null
@@ -95,6 +117,7 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({
+    blob,
     feesten,
     DATABASE_URL: shape(process.env.DATABASE_URL ?? ''),
     DIRECT_URL: shape(process.env.DIRECT_URL ?? ''),
