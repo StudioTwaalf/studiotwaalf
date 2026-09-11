@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Instagram } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { getGuestFromCookies } from '@/lib/wedding/guest'
@@ -116,9 +117,22 @@ function Shell({ coupleName, children }: { coupleName: string; children: React.R
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-studio-black px-7 py-14 text-center">
       <div className="flex w-full max-w-sm flex-col items-center">{children}</div>
+
       <p className="mt-14 text-[10px] uppercase tracking-[0.25em] text-studio-beige/25">
-        {coupleName} · Studio Twaalf
+        {coupleName}
       </p>
+
+      {/* target="_blank" is hier geen detail: zonder dat verliest de gast zijn
+          camera aan Instagram en moet hij de QR opnieuw scannen. */}
+      <a
+        href="https://www.instagram.com/studiotwaalf.be"
+        target="_blank"
+        rel="noreferrer"
+        className="mt-3 inline-flex items-center gap-2 rounded-full border border-studio-beige/15 px-4 py-2 text-[11px] text-studio-beige/45 transition hover:border-studio-yellow/50 hover:text-studio-yellow"
+      >
+        <Instagram size={13} strokeWidth={1.75} aria-hidden />
+        Camera door Studio Twaalf
+      </a>
     </main>
   )
 }
