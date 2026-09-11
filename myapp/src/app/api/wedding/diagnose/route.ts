@@ -75,6 +75,14 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Ruimt de testbestandjes op die deze route zelf heeft achtergelaten.
+  if (req.nextUrl.searchParams.get('opruimen') === '1') {
+    const { list, del } = await import('@vercel/blob')
+    const { blobs } = await list({ prefix: 'diagnose/' })
+    if (blobs.length > 0) await del(blobs.map((b) => b.url))
+    return NextResponse.json({ opgeruimd: blobs.length })
+  }
+
   // Probeert écht naar de Blob-opslag te schrijven. Zonder deze test weten we
   // alleen dát het misgaat, niet waarom: de token kan naar een verwijderde
   // opslag wijzen, verlopen zijn, of bij het verkeerde project horen.
