@@ -79,6 +79,11 @@ export async function updateWeddingAction(formData: FormData) {
 
   revalidatePath(`/admin/huwelijken/${id}`)
   revalidatePath('/admin/huwelijken')
+
+  // Terug naar het schone adres. Zonder dit blijft een oude ?mail=-melding in
+  // de URL staan, en blijft bijvoorbeeld "het album staat nog dicht" zichtbaar
+  // terwijl je het net hebt opengezet — dan lijkt het alsof opslaan niet werkt.
+  redirect(`/admin/huwelijken/${id}`)
 }
 
 /** Verbergen i.p.v. verwijderen: de foto telt wel nog mee voor de limiet. */
