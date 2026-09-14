@@ -1,39 +1,16 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
-import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import ProductenSearchFilter from './ProductenSearchFilter'
-import CsvImportButton from '@/components/admin/CsvImportButton'
 
 interface Props {
-  searchParams: { q?: string; category?: string; shop?: string; sort?: string; dir?: string }
-}
-
-type SortDir = 'asc' | 'desc'
-
-function buildOrderBy(sort: string, dir: SortDir): Prisma.ProductOrderByWithRelationInput[] {
-  if (sort === 'name')  return [{ nameNl:        dir }]
-  if (sort === 'price') return [{ basePriceCents: dir }]
-  return [{ isActive: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }]
-}
-
-function sortHref(sp: Props['searchParams'], column: string): string {
-  const params = new URLSearchParams()
-  if (sp.q)        params.set('q',        sp.q)
-  if (sp.category) params.set('category', sp.category)
-  if (sp.shop)     params.set('shop',     sp.shop)
-  params.set('sort', column)
-  const nextDir: SortDir = sp.sort === column && sp.dir !== 'desc' ? 'desc' : 'asc'
-  params.set('dir', nextDir)
-  return `?${params.toString()}`
+  searchParams: { q?: string; category?: string; shop?: string }
 }
 
 export default async function AdminProductenPage({ searchParams }: Props) {
   const q      = searchParams.q?.trim() ?? ''
   const catId  = searchParams.category ?? ''
   const shop   = searchParams.shop ?? ''
-  const sort   = searchParams.sort ?? ''
-  const dir    = (searchParams.dir ?? 'asc') as SortDir
 
   const [products, categories] = await Promise.all([
     prisma.product.findMany({
@@ -43,7 +20,7 @@ export default async function AdminProductenPage({ searchParams }: Props) {
         ...(shop === 'ja'  ? { isVisibleInShop: true  } : {}),
         ...(shop === 'nee' ? { isVisibleInShop: false } : {}),
       },
-      orderBy: buildOrderBy(sort, dir),
+      orderBy: [{ isActive: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }],
       include: {
         category: true,
         _count: { select: { variants: true } },
@@ -57,8 +34,9 @@ export default async function AdminProductenPage({ searchParams }: Props) {
 
   return (
     <div>
+
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
+      <div className="flex items-start justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Webshop producten</h1>
           <p className="text-sm text-gray-500 mt-0.5">
@@ -68,25 +46,16 @@ export default async function AdminProductenPage({ searchParams }: Props) {
             )}
           </p>
         </div>
-        <div className="flex items-center gap-3 flex-wrap justify-end">
-          <Suspense>
-            <CsvImportButton
-              importUrl="/api/admin/producten/import"
-              templateUrl="/api/admin/producten/template"
-              label="producten"
-            />
-          </Suspense>
-          <Link
-            href="/admin/producten/new"
-            className="inline-flex items-center gap-2 bg-[#2C2416] text-white text-sm font-medium
-                       px-4 py-2 rounded-lg hover:bg-[#3C3020] transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Nieuw product
-          </Link>
-        </div>
+        <Link
+          href="/admin/producten/new"
+          className="inline-flex items-center gap-2 bg-[#2C2416] text-white text-sm font-medium
+                     px-4 py-2 rounded-lg hover:bg-[#3C3020] transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Nieuw product
+        </Link>
       </div>
 
       {/* ── Filters ────────────────────────────────────────────────────────── */}
@@ -121,22 +90,10 @@ export default async function AdminProductenPage({ searchParams }: Props) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/70">
-                <th className="w-12 px-4 py-3" />
-                <SortableTh
-                  label="Naam"
-                  column="name"
-                  href={sortHref(searchParams, 'name')}
-                  active={sort === 'name'}
-                  dir={dir}
-                />
+                <th className="text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wide px-4 py-3 w-12" />
+                <th className="text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wide px-4 py-3">Naam</th>
                 <th className="text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wide px-4 py-3">Categorie</th>
-                <SortableTh
-                  label="Prijs"
-                  column="price"
-                  href={sortHref(searchParams, 'price')}
-                  active={sort === 'price'}
-                  dir={dir}
-                />
+                <th className="text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wide px-4 py-3">Prijs</th>
                 <th className="text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wide px-4 py-3">Varianten</th>
                 <th className="text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wide px-4 py-3">Webshop</th>
                 <th className="text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wide px-4 py-3">Status</th>
@@ -231,31 +188,13 @@ export default async function AdminProductenPage({ searchParams }: Props) {
   )
 }
 
-function SortableTh({
-  label, column, href, active, dir,
-}: {
-  label: string
-  column: string
-  href: string
-  active: boolean
-  dir: SortDir
-}) {
-  return (
-    <th className="text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wide px-4 py-3">
-      <Link href={href} className="inline-flex items-center gap-1 hover:text-gray-700 transition-colors group">
-        {label}
-        <span className={active ? 'text-[#C4A040]' : 'text-gray-300 group-hover:text-gray-400'}>
-          {active ? (dir === 'desc' ? '↓' : '↑') : '↕'}
-        </span>
-      </Link>
-    </th>
-  )
-}
-
 function StatusDot({ active }: { active: boolean }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <span className={['w-1.5 h-1.5 rounded-full', active ? 'bg-green-500' : 'bg-gray-300'].join(' ')} />
+      <span className={[
+        'w-1.5 h-1.5 rounded-full',
+        active ? 'bg-green-500' : 'bg-gray-300',
+      ].join(' ')} />
       <span className={['text-xs', active ? 'text-green-700 font-medium' : 'text-gray-400'].join(' ')}>
         {active ? 'Zichtbaar' : 'Verborgen'}
       </span>

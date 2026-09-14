@@ -5,7 +5,6 @@ import { parseProductDimensions } from '@/lib/product-dimensions'
 import { updateGadgetAction, deleteGadgetAction, toggleShopLinkAction } from './actions'
 import ImageUploadField from '@/components/admin/ImageUploadField'
 import VariantActionsRow from '@/components/admin/VariantActionsRow'
-import ProductAssetsManager from '@/components/admin/ProductAssetsManager'
 
 interface Props {
   params:       { id: string }
@@ -13,25 +12,16 @@ interface Props {
 }
 
 export default async function EditGadgetPage({ params, searchParams }: Props) {
-  const [product, categoryParents] = await Promise.all([
+  const [product, categories] = await Promise.all([
     prisma.product.findUnique({
       where:   { id: params.id },
       include: {
         category: true,
-        assets: { orderBy: { sortOrder: 'asc' } },
+        assets: { take: 1, orderBy: { sortOrder: 'asc' } },
         variants: { orderBy: { sortOrder: 'asc' } },
       },
     }),
-    prisma.category.findMany({
-      where:   { isActive: true, parentId: null },
-      orderBy: [{ sortOrder: 'asc' }, { nameNl: 'asc' }],
-      include: {
-        children: {
-          where:   { isActive: true },
-          orderBy: [{ sortOrder: 'asc' }, { nameNl: 'asc' }],
-        },
-      },
-    }),
+    prisma.category.findMany({ where: { isActive: true }, orderBy: { nameNl: 'asc' } }),
   ])
 
   if (!product) notFound()
@@ -115,17 +105,9 @@ export default async function EditGadgetPage({ params, searchParams }: Props) {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white
                                  focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
-                      {categoryParents.map((p) =>
-                        p.children.length > 0 ? (
-                          <optgroup key={p.id} label={p.nameNl}>
-                            {p.children.map((c) => (
-                              <option key={c.id} value={c.id}>{c.nameNl}</option>
-                            ))}
-                          </optgroup>
-                        ) : (
-                          <option key={p.id} value={p.id}>{p.nameNl}</option>
-                        )
-                      )}
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.id}>{c.nameNl}</option>
+                      ))}
                     </select>
                   </div>
                   <div>
@@ -318,20 +300,6 @@ export default async function EditGadgetPage({ params, searchParams }: Props) {
               </Link>
             </div>
           </form>
-
-          {/* Productafbeeldingen (gallerij) — buiten het form zodat uploads direct werken */}
-          <div className="mt-8 pt-8 border-t border-gray-100">
-            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
-              Productafbeeldingen
-            </h2>
-            <p className="text-xs text-gray-400 mb-4">
-              Afbeeldingen die zichtbaar zijn op de productpagina in de webshop. De eerste afbeelding is de hoofdfoto.
-            </p>
-            <ProductAssetsManager
-              productId={product.id}
-              initialAssets={product.assets}
-            />
-          </div>
         </div>
 
         {/* Side panel */}

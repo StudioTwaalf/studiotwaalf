@@ -18,7 +18,6 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
       diyTemplateId:    true,
       stockQuantity:    true,
       category: { select: { nameNl: true, slug: true } },
-      thumbnailImageUrl: true,
       assets:   { orderBy: { sortOrder: 'asc' }, select: { url: true, altNl: true } },
       variants: {
         where: { isActive: true },
