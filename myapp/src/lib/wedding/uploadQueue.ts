@@ -169,7 +169,7 @@ export async function flush(): Promise<void> {
         emit({
           waarschuwing:
             'Je foto\u2019s kunnen nu niet verstuurd worden. Ze staan veilig op je toestel ' +
-            'en gaan automatisch door zodra het weer lukt \u2014 hou deze pagina open.',
+            'en gaan automatisch door zodra het weer lukt. Hou deze pagina open.',
         })
       }
 

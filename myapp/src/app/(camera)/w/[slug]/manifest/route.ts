@@ -20,7 +20,7 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
   }
 
   const manifest = {
-    name: `${event.coupleName} — wegwerpcamera`,
+    name: `Wegwerpcamera van ${event.coupleName}`,
     short_name: event.coupleName,
     description: `Maak foto's op het feest van ${event.coupleName}.`,
     start_url: `/w/${event.slug}`,

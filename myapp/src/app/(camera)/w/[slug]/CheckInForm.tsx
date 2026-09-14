@@ -79,7 +79,7 @@ export default function CheckInForm({
 
       <label className="mt-5 block text-[11px] uppercase tracking-[0.2em] text-studio-beige/55">
         E-mail{' '}
-        <span className="normal-case tracking-normal text-studio-beige/35">— optioneel</span>
+        <span className="normal-case tracking-normal text-studio-beige/35">(optioneel)</span>
       </label>
       <input
         value={email}

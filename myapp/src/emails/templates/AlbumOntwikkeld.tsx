@@ -32,8 +32,8 @@ export function AlbumOntwikkeld({
         <Text style={styles.greeting}>Dag {voornaam},</Text>
 
         <Text style={styles.paragraph}>
-          De foto&apos;s van het feest van {coupleName} zijn ontwikkeld. Ook die van jou — je
-          ziet ze nu voor het eerst terug.
+          De foto&apos;s van het feest van {coupleName} zijn ontwikkeld. Ook die van jou. Je ziet
+          ze nu voor het eerst terug.
         </Text>
 
         <Text style={styles.paragraph}>
@@ -60,7 +60,7 @@ export function AlbumOntwikkeld({
 
         <Text style={styles.instaTekst}>
           Deze wegwerpcamera is gemaakt door Studio Twaalf. Op Instagram laten we zien wat we
-          nog meer maken voor trouwfeesten — van uitnodigingen tot het drukwerk op tafel.
+          nog meer maken voor trouwfeesten: van uitnodigingen tot het drukwerk op tafel.
         </Text>
 
         <Section style={{ marginTop: '20px' }}>

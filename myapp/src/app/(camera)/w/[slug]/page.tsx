@@ -93,8 +93,8 @@ export default async function WeddingCameraPage({ params }: { params: { slug: st
       <p className="text-[11px] uppercase tracking-[0.3em] text-studio-beige/45">{dateLabel}</p>
       <h1 className="mt-3 font-serif text-4xl leading-tight text-studio-beige">{event.coupleName}</h1>
       <p className="mt-5 max-w-sm text-sm leading-relaxed text-studio-beige/60">
-        Je krijgt een filmpje van {event.photoLimit} foto&apos;s. Je ziet ze niet meteen terug —
-        net als bij een echte wegwerpcamera worden ze pas later ontwikkeld.
+        Je krijgt een filmpje van {event.photoLimit} foto&apos;s. Je ziet ze niet meteen terug.
+        Net als bij een echte wegwerpcamera worden ze pas later ontwikkeld.
       </p>
 
       <div className="mt-10 w-full">

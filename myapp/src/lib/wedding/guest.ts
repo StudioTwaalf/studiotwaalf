@@ -19,7 +19,7 @@ const MAX_AGE = 60 * 60 * 24 * 3 // 3 dagen — feest + de dag erna
 
 function secret(): string {
   const s = process.env.NEXTAUTH_SECRET
-  if (!s) throw new Error('NEXTAUTH_SECRET ontbreekt — nodig om gast-cookies te ondertekenen')
+  if (!s) throw new Error('NEXTAUTH_SECRET ontbreekt. Die is nodig om gast-cookies te ondertekenen')
   return s
 }
 

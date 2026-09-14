@@ -128,7 +128,7 @@ export default async function WeddingDetailPage({
             />
             <span className="mt-1.5 block text-xs text-gray-400">
               Verhogen geeft iedereen meteen extra foto&apos;s. Verlagen raakt wie er al over zit
-              niet — die kunnen enkel niet verder.
+              niet. Die kunnen enkel niet verder.
             </span>
           </label>
 
@@ -176,7 +176,7 @@ export default async function WeddingDetailPage({
           {searchParams.mail === 'gesloten' && (
             <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               Het album staat nog dicht. Vul eerst hierboven een ontwikkeldatum in die al
-              gepasseerd is — anders klikken je gasten op een link die niets toont.
+              gepasseerd is. Anders klikken je gasten op een link die niets toont.
             </p>
           )}
 
@@ -186,7 +186,7 @@ export default async function WeddingDetailPage({
               {Number(searchParams.overgeslagen) > 0 &&
                 `, ${searchParams.overgeslagen} overgeslagen (hadden hem al)`}
               {Number(searchParams.mislukt) > 0 && `, ${searchParams.mislukt} mislukt`}
-              {' '}— van {searchParams.totaal} gasten met een e-mailadres.
+              {' '}van {searchParams.totaal} gasten met een e-mailadres.
             </p>
           )}
 
@@ -197,7 +197,7 @@ export default async function WeddingDetailPage({
           </p>
 
           <p className="mt-1.5 text-xs text-gray-400">
-            Ze krijgen een link naar het album, niet de foto&apos;s zelf — die passen niet in een
+            Ze krijgen een link naar het album, niet de foto&apos;s zelf. Die passen niet in een
             mailbox. Wie de mail al kreeg, krijgt hem geen tweede keer.
           </p>
 
@@ -205,7 +205,7 @@ export default async function WeddingDetailPage({
             <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               <span className="font-medium">E-mail staat nog niet aan.</span> Er is geen{' '}
               <code className="font-mono text-xs">RESEND_API_KEY</code> ingesteld, dus er vertrekt
-              niets. Zet die eerst in Vercel en verifieer je domein bij Resend — anders worden
+              niets. Zet die eerst in Vercel en verifieer je domein bij Resend. Anders worden
               deze gasten als verstuurd genoteerd en krijgen ze de mail later ook niet meer.
             </p>
           )}
@@ -245,7 +245,7 @@ export default async function WeddingDetailPage({
                 {guests.map((guest) => (
                   <tr key={guest.id}>
                     <td className="py-2.5 text-gray-900">{guest.name}</td>
-                    <td className="py-2.5 text-gray-500">{guest.email ?? '—'}</td>
+                    <td className="py-2.5 text-gray-500">{guest.email ?? 'geen'}</td>
                     <td className="py-2.5 text-gray-600">
                       {guest.photoCount} / {event.photoLimit}
                     </td>
