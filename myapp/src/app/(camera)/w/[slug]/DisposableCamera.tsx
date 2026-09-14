@@ -287,7 +287,16 @@ export default function DisposableCamera({
       {/* Status van de wachtrij */}
       {(queue.pending > 0 || queue.error || queue.waarschuwing) && (
         <div className="absolute inset-x-0 top-24 flex justify-center px-5">
-          {queue.waarschuwing ? (
+          <a
+        href="https://www.instagram.com/studiotwaalf.be"
+        target="_blank"
+        rel="noreferrer"
+        className="mt-8 inline-flex items-center gap-2 rounded-full border border-studio-beige/20 px-5 py-2.5 text-xs text-studio-beige/55 transition active:border-studio-yellow/50 active:text-studio-yellow"
+      >
+        Camera door Studio Twaalf — volg ons
+      </a>
+
+      {queue.waarschuwing ? (
             <p className="max-w-xs rounded-xl border border-studio-yellow/40 bg-studio-black/85 px-4 py-2.5 text-center text-xs leading-relaxed text-studio-yellow backdrop-blur">
               {queue.waarschuwing}
             </p>

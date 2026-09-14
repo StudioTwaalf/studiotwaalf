@@ -24,6 +24,7 @@ import { Bestelbevestiging }   from '@/emails/templates/Bestelbevestiging'
 import { OfferteBevestiging }  from '@/emails/templates/OfferteBevestiging'
 import { Welkomstmail }        from '@/emails/templates/Welkomstmail'
 import { AbandonedDesign }     from '@/emails/templates/AbandonedDesign'
+import { AlbumOntwikkeld }     from '@/emails/templates/AlbumOntwikkeld'
 import { BestellingVerzonden } from '@/emails/templates/BestellingVerzonden'
 
 // ─── Email types (used as idempotency key) ────────────────────────────────────
@@ -34,6 +35,7 @@ export const EMAIL_TYPES = {
   WELCOME:              'welcome',
   ABANDONED_DESIGN:     'abandoned_design',
   ORDER_SHIPPED:        'order_shipped',
+  WEDDING_ALBUM_READY:  'wedding_album_ready',
 } as const
 
 export type EmailType = (typeof EMAIL_TYPES)[keyof typeof EMAIL_TYPES]
@@ -240,6 +242,35 @@ export async function sendOfferteBevestiging(offerRequest: {
  * user.created → welkomstmail
  * referenceId: user.id — idempotent per user
  */
+/**
+ * Het album van een bruiloft is ontwikkeld → bericht aan één gast.
+ *
+ * referenceId is de gast-id, dus iedere gast krijgt deze mail hoogstens één
+ * keer per feest. Drukt het koppel twee keer op de knop, dan slaat sendOnce
+ * de al verstuurde adressen over.
+ */
+export async function sendAlbumOntwikkeld(opts: {
+  guestId:     string
+  to:          string
+  voornaam:    string
+  coupleName:  string
+  albumUrl:    string
+  aantalFotos: number
+}): Promise<EmailResult> {
+  return sendOnce({
+    type:        EMAIL_TYPES.WEDDING_ALBUM_READY,
+    referenceId: opts.guestId,
+    to:          opts.to,
+    subject:     `De foto's van ${opts.coupleName} zijn ontwikkeld`,
+    react:       React.createElement(AlbumOntwikkeld, {
+      voornaam:    opts.voornaam,
+      coupleName:  opts.coupleName,
+      albumUrl:    opts.albumUrl,
+      aantalFotos: opts.aantalFotos,
+    }),
+  })
+}
+
 export async function sendWelkomstmail(user: {
   id:        string
   email:     string

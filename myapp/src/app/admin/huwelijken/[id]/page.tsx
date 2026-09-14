@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import WeddingQrCard from '@/components/admin/WeddingQrCard'
 import WeddingPhotoGrid, { type AdminPhoto } from '@/components/admin/WeddingPhotoGrid'
-import { deleteWeddingAction, updateWeddingAction } from '../actions'
+import { deleteWeddingAction, stuurAlbumAction, updateWeddingAction } from '../actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,7 +15,13 @@ function toInputDateTime(date: Date | null): string {
   )}:${pad(date.getMinutes())}`
 }
 
-export default async function WeddingDetailPage({ params }: { params: { id: string } }) {
+export default async function WeddingDetailPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string }
+  searchParams: { mail?: string; verstuurd?: string; overgeslagen?: string; mislukt?: string; totaal?: string }
+}) {
   const event = await prisma.weddingEvent.findUnique({
     where: { id: params.id },
     select: {
@@ -58,6 +64,11 @@ export default async function WeddingDetailPage({ params }: { params: { id: stri
     orderBy: { photoCount: 'desc' },
     select: { id: true, name: true, email: true, photoCount: true },
   })
+
+  const gastenMetMail = guests.filter((g) => g.email).length
+  // Zonder Resend-sleutel logt de mailservice iedereen als verstuurd zonder
+  // dat er iets vertrekt — en slaat hij diezelfde gasten daarna voorgoed over.
+  const mailIsIngesteld = Boolean(process.env.RESEND_API_KEY)
 
   return (
     <div>
@@ -157,6 +168,59 @@ export default async function WeddingDetailPage({ params }: { params: { id: stri
             Opslaan
           </button>
         </form>
+
+        {/* ── Album versturen ──────────────────────────────────────────── */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-6">
+          <h2 className="text-sm font-medium text-gray-900">Album naar de gasten sturen</h2>
+
+          {searchParams.mail === 'gesloten' && (
+            <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              Het album staat nog dicht. Vul eerst hierboven een ontwikkeldatum in die al
+              gepasseerd is — anders klikken je gasten op een link die niets toont.
+            </p>
+          )}
+
+          {searchParams.mail === 'klaar' && (
+            <p className="mt-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+              {searchParams.verstuurd} verstuurd
+              {Number(searchParams.overgeslagen) > 0 &&
+                `, ${searchParams.overgeslagen} overgeslagen (hadden hem al)`}
+              {Number(searchParams.mislukt) > 0 && `, ${searchParams.mislukt} mislukt`}
+              {' '}— van {searchParams.totaal} gasten met een e-mailadres.
+            </p>
+          )}
+
+          <p className="mt-3 text-sm text-gray-600">
+            {gastenMetMail === 0
+              ? 'Geen enkele gast heeft een e-mailadres achtergelaten. Deel het album dan via de link of de QR-code.'
+              : `${gastenMetMail} van de ${guests.length} gasten liet een e-mailadres achter.`}
+          </p>
+
+          <p className="mt-1.5 text-xs text-gray-400">
+            Ze krijgen een link naar het album, niet de foto&apos;s zelf — die passen niet in een
+            mailbox. Wie de mail al kreeg, krijgt hem geen tweede keer.
+          </p>
+
+          {!mailIsIngesteld && (
+            <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <span className="font-medium">E-mail staat nog niet aan.</span> Er is geen{' '}
+              <code className="font-mono text-xs">RESEND_API_KEY</code> ingesteld, dus er vertrekt
+              niets. Zet die eerst in Vercel en verifieer je domein bij Resend — anders worden
+              deze gasten als verstuurd genoteerd en krijgen ze de mail later ook niet meer.
+            </p>
+          )}
+
+          <form action={stuurAlbumAction} className="mt-4">
+            <input type="hidden" name="id" value={event.id} />
+            <button
+              type="submit"
+              disabled={gastenMetMail === 0 || !mailIsIngesteld}
+              className="rounded-full bg-gray-900 px-6 py-2.5 text-sm text-white hover:bg-gray-700 transition-colors disabled:opacity-40"
+            >
+              Stuur het album naar {gastenMetMail} gasten
+            </button>
+          </form>
+        </div>
 
         {/* ── Foto's ───────────────────────────────────────────────────── */}
         <div className="rounded-2xl border border-gray-200 bg-white p-6">

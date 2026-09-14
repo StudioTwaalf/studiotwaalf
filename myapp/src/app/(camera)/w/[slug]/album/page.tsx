@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Instagram } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 
@@ -84,6 +85,20 @@ export default async function AlbumPage({ params }: { params: { slug: string } }
           ))}
         </div>
       )}
+
+      {/* Instagram: het album is waar de gasten uit de mail landen, en waar ze
+          rustig rondkijken. Beste plek om het te vragen. */}
+      <div className="mt-16 flex justify-center">
+        <a
+          href="https://www.instagram.com/studiotwaalf.be"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-2 rounded-full border border-studio-beige/20 px-5 py-2.5 text-xs text-studio-beige/55 transition hover:border-studio-yellow/50 hover:text-studio-yellow"
+        >
+          <Instagram size={14} strokeWidth={1.75} aria-hidden />
+          Camera door Studio Twaalf — volg ons
+        </a>
+      </div>
     </main>
   )
 }

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { sendAlbumOntwikkeld } from '@/lib/email'
 
 function toSlug(value: string): string {
   return value
@@ -101,4 +102,72 @@ export async function deleteWeddingAction(formData: FormData) {
   await prisma.weddingEvent.delete({ where: { id } })
   revalidatePath('/admin/huwelijken')
   redirect('/admin/huwelijken')
+}
+
+/**
+ * Stuurt alle gasten met een e-mailadres een bericht dat het album open staat.
+ *
+ * Twee bewuste keuzes:
+ *  • Alleen als het album ook écht open is. Een mail sturen naar een album dat
+ *    nog "aan het ontwikkelen" is, levert honderd teleurgestelde gasten op.
+ *  • sendOnce houdt per gast bij of de mail al vertrok, dus twee keer drukken
+ *    stuurt niemand een dubbele mail. Wie er later bijkomt, krijgt hem alsnog.
+ */
+export async function stuurAlbumAction(formData: FormData) {
+  const id = formData.get('id') as string
+
+  const event = await prisma.weddingEvent.findUnique({
+    where: { id },
+    select: { id: true, slug: true, coupleName: true, revealAt: true },
+  })
+
+  if (!event) redirect('/admin/huwelijken')
+
+  if (!event.revealAt || event.revealAt > new Date()) {
+    redirect(`/admin/huwelijken/${id}?mail=gesloten`)
+  }
+
+  const [gasten, aantalFotos] = await Promise.all([
+    prisma.weddingGuest.findMany({
+      where: { eventId: id, email: { not: null } },
+      select: { id: true, name: true, email: true },
+    }),
+    prisma.weddingPhoto.count({ where: { eventId: id, isHidden: false } }),
+  ])
+
+  const basis = (process.env.NEXTAUTH_URL ?? 'https://studiotwaalf.vercel.app').replace(/\/$/, '')
+  const albumUrl = `${basis}/w/${event.slug}/album`
+
+  let verstuurd = 0
+  let overgeslagen = 0
+  let mislukt = 0
+
+  // In blokjes van acht: honderd mails één voor één duurt te lang voor een
+  // serverless functie, alles tegelijk vraagt om rate limits bij Resend.
+  const BLOK = 8
+  for (let i = 0; i < gasten.length; i += BLOK) {
+    const resultaten = await Promise.all(
+      gasten.slice(i, i + BLOK).map((gast) =>
+        sendAlbumOntwikkeld({
+          guestId: gast.id,
+          to: gast.email!,
+          voornaam: gast.name.split(' ')[0],
+          coupleName: event.coupleName,
+          albumUrl,
+          aantalFotos,
+        }),
+      ),
+    )
+
+    for (const r of resultaten) {
+      if (r.error) mislukt++
+      else if (r.skipped) overgeslagen++
+      else verstuurd++
+    }
+  }
+
+  revalidatePath(`/admin/huwelijken/${id}`)
+  redirect(
+    `/admin/huwelijken/${id}?mail=klaar&verstuurd=${verstuurd}&overgeslagen=${overgeslagen}&mislukt=${mislukt}&totaal=${gasten.length}`,
+  )
 }

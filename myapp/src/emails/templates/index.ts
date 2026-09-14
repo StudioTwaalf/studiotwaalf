@@ -1,3 +1,4 @@
+export { AlbumOntwikkeld } from './AlbumOntwikkeld'
 export { AbandonedDesign } from './AbandonedDesign'
 export { Bestelbevestiging } from './Bestelbevestiging'
 export { BestellingVerzonden } from './BestellingVerzonden'
