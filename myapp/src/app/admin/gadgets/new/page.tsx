@@ -7,10 +7,18 @@ import { createGadgetAction } from './actions'
 import ImageUploadField from '@/components/admin/ImageUploadField'
 
 export default async function NewGadgetPage() {
-  const categories = await prisma.category.findMany({
-    where:   { isActive: true },
-    orderBy: { nameNl: 'asc' },
+  const categoryParents = await prisma.category.findMany({
+    where:   { isActive: true, parentId: null },
+    orderBy: [{ sortOrder: 'asc' }, { nameNl: 'asc' }],
+    include: {
+      children: {
+        where:   { isActive: true },
+        orderBy: [{ sortOrder: 'asc' }, { nameNl: 'asc' }],
+      },
+    },
   })
+  // flat list for the "no categories" warning
+  const categories = categoryParents.flatMap((p) => [p, ...p.children])
 
   return (
     <div className="max-w-3xl">
@@ -87,9 +95,17 @@ export default async function NewGadgetPage() {
                                focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="">Kies categorie…</option>
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id}>{c.nameNl}</option>
-                    ))}
+                    {categoryParents.map((p) =>
+                      p.children.length > 0 ? (
+                        <optgroup key={p.id} label={p.nameNl}>
+                          {p.children.map((c) => (
+                            <option key={c.id} value={c.id}>{c.nameNl}</option>
+                          ))}
+                        </optgroup>
+                      ) : (
+                        <option key={p.id} value={p.id}>{p.nameNl}</option>
+                      )
+                    )}
                   </select>
                 </div>
                 <div>

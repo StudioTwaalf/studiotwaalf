@@ -31,7 +31,7 @@ export default async function EditProductPage({ params, searchParams }: Props) {
     }),
     prisma.category.findMany({ where: { isActive: true }, orderBy: { nameNl: 'asc' } }),
     prisma.template.findMany({
-      where:   { status: 'active' },
+      where:   { status: 'published' },
       orderBy: { name: 'asc' },
       select:  { id: true, name: true, category: true },
     }),

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Instagram } from 'lucide-react'
+import TelBezoek from './TelBezoek'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 
@@ -50,6 +51,8 @@ export default async function AlbumPage({ params }: { params: { slug: string } }
 
   return (
     <main className="min-h-screen bg-studio-black px-5 pb-20 pt-14">
+      <TelBezoek slug={event.slug} />
+
       <header className="mx-auto max-w-4xl text-center">
         <h1 className="font-serif text-3xl text-studio-beige">{event.coupleName}</h1>
         <p className="mt-2 text-[11px] uppercase tracking-[0.25em] text-studio-beige/45">

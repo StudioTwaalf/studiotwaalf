@@ -54,9 +54,18 @@ const dmSerifDisplay = DM_Serif_Display({
 export const metadata: Metadata = {
   title: 'Studio Twaalf',
   description: 'Gepersonaliseerde drukwerk — geboortekaartjes, huwelijksuitnodigingen en meer.',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Studio Twaalf',
+  },
   icons: {
     icon: '/logo/logo.png',
-    apple: '/logo/logo.png',
+    apple: '/logo/apple-touch-icon.png',
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
   },
 }
 

@@ -1,20 +1,47 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
+import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { parseProductDimensions } from '@/lib/product-dimensions'
 import GadgetDeleteButton from '@/components/admin/GadgetDeleteButton'
 import GadgetsSearchFilter from '@/components/admin/GadgetsSearchFilter'
+import CsvImportButton from '@/components/admin/CsvImportButton'
 
 interface Props {
-  searchParams: { q?: string; category?: string; status?: string }
+  searchParams: { q?: string; category?: string; status?: string; sort?: string; dir?: string }
+}
+
+type SortDir = 'asc' | 'desc'
+
+function buildOrderBy(sort: string, dir: SortDir): Prisma.ProductOrderByWithRelationInput[] {
+  if (sort === 'name')  return [{ nameNl:        dir }]
+  if (sort === 'price') return [{ basePriceCents: dir }]
+  return [{ isActive: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }]
+}
+
+function sortHref(
+  sp: Props['searchParams'],
+  column: string,
+): string {
+  const params = new URLSearchParams()
+  if (sp.q)        params.set('q',        sp.q)
+  if (sp.category) params.set('category', sp.category)
+  if (sp.status)   params.set('status',   sp.status)
+  params.set('sort', column)
+  const sameCol  = sp.sort === column
+  const nextDir: SortDir = sameCol && sp.dir !== 'desc' ? 'desc' : 'asc'
+  params.set('dir', nextDir)
+  return `?${params.toString()}`
 }
 
 export default async function AdminGadgetsPage({ searchParams }: Props) {
   const q      = searchParams.q?.trim() ?? ''
   const catId  = searchParams.category ?? ''
   const status = searchParams.status ?? ''
+  const sort   = searchParams.sort ?? ''
+  const dir    = (searchParams.dir ?? 'asc') as SortDir
 
-  const [products, categories] = await Promise.all([
+  const [products, categoryParents] = await Promise.all([
     prisma.product.findMany({
       where: {
         ...(q     ? { nameNl: { contains: q, mode: 'insensitive' as const } } : {}),
@@ -22,13 +49,22 @@ export default async function AdminGadgetsPage({ searchParams }: Props) {
         ...(status === 'active'   ? { isActive: true  } : {}),
         ...(status === 'inactive' ? { isActive: false } : {}),
       },
-      orderBy: [{ isActive: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }],
+      orderBy: buildOrderBy(sort, dir),
       include: {
         category: true,
         _count: { select: { variants: true } },
       },
     }),
-    prisma.category.findMany({ where: { isActive: true }, orderBy: { nameNl: 'asc' } }),
+    prisma.category.findMany({
+      where:   { isActive: true, parentId: null },
+      orderBy: [{ sortOrder: 'asc' }, { nameNl: 'asc' }],
+      include: {
+        children: {
+          where:   { isActive: true },
+          orderBy: [{ sortOrder: 'asc' }, { nameNl: 'asc' }],
+        },
+      },
+    }),
   ])
 
   return (
@@ -41,7 +77,14 @@ export default async function AdminGadgetsPage({ searchParams }: Props) {
             {products.length} product{products.length !== 1 ? 'en' : ''}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap justify-end">
+          <Suspense>
+            <CsvImportButton
+              importUrl="/api/admin/gadgets/import"
+              templateUrl="/api/admin/gadgets/template"
+              label="gadgets"
+            />
+          </Suspense>
           <Link
             href="/admin/gadgets/categories"
             className="inline-flex items-center gap-2 text-sm text-gray-600 border border-gray-300
@@ -65,7 +108,7 @@ export default async function AdminGadgetsPage({ searchParams }: Props) {
       {/* Search / filter */}
       <div className="mb-4">
         <Suspense>
-          <GadgetsSearchFilter categories={categories} />
+          <GadgetsSearchFilter categoryParents={categoryParents} />
         </Suspense>
       </div>
 
@@ -93,11 +136,23 @@ export default async function AdminGadgetsPage({ searchParams }: Props) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 w-10" />
-                <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Naam</th>
+                <th className="w-10 px-4 py-3" />
+                <SortableTh
+                  label="Naam"
+                  column="name"
+                  href={sortHref(searchParams, 'name')}
+                  active={sort === 'name'}
+                  dir={dir}
+                />
                 <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Categorie</th>
                 <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Afmetingen</th>
-                <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Prijs</th>
+                <SortableTh
+                  label="Prijs"
+                  column="price"
+                  href={sortHref(searchParams, 'price')}
+                  active={sort === 'price'}
+                  dir={dir}
+                />
                 <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Varianten</th>
                 <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">DIY</th>
                 <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Shop</th>
@@ -203,6 +258,27 @@ export default async function AdminGadgetsPage({ searchParams }: Props) {
         </div>
       )}
     </div>
+  )
+}
+
+function SortableTh({
+  label, column, href, active, dir,
+}: {
+  label: string
+  column: string
+  href: string
+  active: boolean
+  dir: SortDir
+}) {
+  return (
+    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">
+      <Link href={href} className="inline-flex items-center gap-1 hover:text-gray-800 transition-colors group">
+        {label}
+        <span className={active ? 'text-indigo-500' : 'text-gray-300 group-hover:text-gray-400'}>
+          {active ? (dir === 'desc' ? '↓' : '↑') : '↕'}
+        </span>
+      </Link>
+    </th>
   )
 }
 

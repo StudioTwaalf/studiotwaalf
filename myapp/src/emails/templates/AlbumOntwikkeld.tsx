@@ -3,7 +3,8 @@ import * as React from 'react'
 import { EmailButton, EmailFooter, EmailHeader, EmailLayout, EmailSection } from '../components'
 
 interface AlbumOntwikkeldProps {
-  voornaam: string
+  /** Ontbreekt bij extra ontvangers die alleen als adres zijn opgegeven. */
+  voornaam?: string | null
   coupleName: string
   albumUrl: string
   aantalFotos: number
@@ -29,7 +30,7 @@ export function AlbumOntwikkeld({
       <EmailHeader />
 
       <EmailSection>
-        <Text style={styles.greeting}>Dag {voornaam},</Text>
+        <Text style={styles.greeting}>{voornaam ? `Dag ${voornaam},` : 'Hallo,'}</Text>
 
         <Text style={styles.paragraph}>
           De foto&apos;s van het feest van {coupleName} zijn ontwikkeld. Ook die van jou. Je ziet

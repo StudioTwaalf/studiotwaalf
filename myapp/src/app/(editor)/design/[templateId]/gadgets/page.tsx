@@ -14,7 +14,7 @@ import GadgetsPageClient from '@/components/GadgetsPageClient'
 
 interface Props {
   params:       { templateId: string }
-  searchParams: { design?: string; paper?: string }
+  searchParams: { design?: string; paper?: string; open?: string }
 }
 
 export default async function GadgetsPage({ params, searchParams }: Props) {
@@ -63,7 +63,7 @@ export default async function GadgetsPage({ params, searchParams }: Props) {
     description:    p.descriptionNl ?? '',
     fromPriceCents: p.basePriceCents,
     personalizable: p.isPersonalizable,
-    emoji:          p.assets[0]?.url ?? undefined,
+    emoji:          p.mockupImageUrl ?? p.thumbnailImageUrl ?? p.assets[0]?.url ?? undefined,
     category:       p.category?.nameNl ?? undefined,
     previewConfig:  parsePreviewConfig(p.configJson),
     quantityConfig: parseQuantityConfig(p.configJson),
@@ -107,6 +107,7 @@ export default async function GadgetsPage({ params, searchParams }: Props) {
       initialOverrides={gadgetSelections.overrides}
       paperParam={searchParams.paper ?? null}
       journeyType={journeyType}
+      initialModalGadgetId={searchParams.open ?? null}
     />
   )
 }

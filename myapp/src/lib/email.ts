@@ -250,9 +250,10 @@ export async function sendOfferteBevestiging(offerRequest: {
  * de al verstuurde adressen over.
  */
 export async function sendAlbumOntwikkeld(opts: {
+  /** Gast-id, of `event:<id>:<adres>` voor een extra ontvanger. */
   guestId:     string
   to:          string
-  voornaam:    string
+  voornaam:    string | null
   coupleName:  string
   albumUrl:    string
   aantalFotos: number

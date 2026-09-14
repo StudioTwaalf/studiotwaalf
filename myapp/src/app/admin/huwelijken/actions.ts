@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { sendAlbumOntwikkeld } from '@/lib/email'
+import { leesOntvangers, splitsTekstvak } from '@/lib/wedding/ontvangers'
 
 function toSlug(value: string): string {
   return value
@@ -66,6 +67,7 @@ export async function updateWeddingAction(formData: FormData) {
   const photoLimit = parseInt((formData.get('photoLimit') as string) || '20', 10)
   const revealRaw = ((formData.get('revealAt') as string) ?? '').trim()
   const welcomeText = ((formData.get('welcomeText') as string) ?? '').trim()
+  const extraRuw = (formData.get('extraEmails') as string) ?? ''
 
   await prisma.weddingEvent.update({
     where: { id },
@@ -74,6 +76,11 @@ export async function updateWeddingAction(formData: FormData) {
       photoLimit: Number.isFinite(photoLimit) ? Math.min(200, Math.max(1, photoLimit)) : 20,
       revealAt: revealRaw ? new Date(revealRaw) : null,
       welcomeText: welcomeText || null,
+      // Meteen opgeschoond bewaard: onleesbare regels halen de lijst niet,
+      // zodat je bij het versturen niet voor verrassingen staat.
+      extraEmails: leesOntvangers(splitsTekstvak(extraRuw)).map((o) =>
+        o.naam ? `${o.naam} <${o.email}>` : o.email,
+      ),
     },
   })
 
@@ -123,7 +130,7 @@ export async function stuurAlbumAction(formData: FormData) {
 
   const event = await prisma.weddingEvent.findUnique({
     where: { id },
-    select: { id: true, slug: true, coupleName: true, revealAt: true },
+    select: { id: true, slug: true, coupleName: true, revealAt: true, extraEmails: true },
   })
 
   if (!event) redirect('/admin/huwelijken')
@@ -143,6 +150,26 @@ export async function stuurAlbumAction(formData: FormData) {
   const basis = (process.env.NEXTAUTH_URL ?? 'https://studiotwaalf.vercel.app').replace(/\/$/, '')
   const albumUrl = `${basis}/w/${event.slug}/album`
 
+  // Gasten en extra ontvangers door dezelfde molen. Een extra ontvanger die
+  // toevallig ook ingecheckt is als gast, krijgt de mail maar één keer.
+  const bekend = new Set(gasten.map((g) => g.email!.toLowerCase()))
+  const extras = leesOntvangers(event.extraEmails).filter(
+    (o) => !bekend.has(o.email.toLowerCase()),
+  )
+
+  const ontvangers = [
+    ...gasten.map((g) => ({
+      referentie: g.id,
+      email: g.email!,
+      voornaam: g.name.split(' ')[0] as string | null,
+    })),
+    ...extras.map((o) => ({
+      referentie: `event:${event.id}:${o.email.toLowerCase()}`,
+      email: o.email,
+      voornaam: o.naam,
+    })),
+  ]
+
   let verstuurd = 0
   let overgeslagen = 0
   let mislukt = 0
@@ -150,13 +177,13 @@ export async function stuurAlbumAction(formData: FormData) {
   // In blokjes van acht: honderd mails één voor één duurt te lang voor een
   // serverless functie, alles tegelijk vraagt om rate limits bij Resend.
   const BLOK = 8
-  for (let i = 0; i < gasten.length; i += BLOK) {
+  for (let i = 0; i < ontvangers.length; i += BLOK) {
     const resultaten = await Promise.all(
-      gasten.slice(i, i + BLOK).map((gast) =>
+      ontvangers.slice(i, i + BLOK).map((o) =>
         sendAlbumOntwikkeld({
-          guestId: gast.id,
-          to: gast.email!,
-          voornaam: gast.name.split(' ')[0],
+          guestId: o.referentie,
+          to: o.email,
+          voornaam: o.voornaam,
           coupleName: event.coupleName,
           albumUrl,
           aantalFotos,
@@ -173,6 +200,6 @@ export async function stuurAlbumAction(formData: FormData) {
 
   revalidatePath(`/admin/huwelijken/${id}`)
   redirect(
-    `/admin/huwelijken/${id}?mail=klaar&verstuurd=${verstuurd}&overgeslagen=${overgeslagen}&mislukt=${mislukt}&totaal=${gasten.length}`,
+    `/admin/huwelijken/${id}?mail=klaar&verstuurd=${verstuurd}&overgeslagen=${overgeslagen}&mislukt=${mislukt}&totaal=${ontvangers.length}`,
   )
 }

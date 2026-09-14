@@ -24,7 +24,8 @@ export async function POST(req: NextRequest) {
       mimeType: result.mimeType ?? mimeType,
     })
   } catch (err) {
-    console.error('[upload] Error:', err)
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[upload] Error:', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

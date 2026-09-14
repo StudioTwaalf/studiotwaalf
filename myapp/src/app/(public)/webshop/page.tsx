@@ -21,27 +21,37 @@ const ORDER_BY: Record<SortKey, object> = {
 }
 
 interface PageProps {
-  searchParams: Promise<{ categorie?: string; sorteer?: string }>
+  searchParams: Promise<{ categorie?: string; sorteer?: string; q?: string }>
 }
 
 export default async function WebshopPage({ searchParams }: PageProps) {
-  const { categorie, sorteer } = await searchParams
+  const { categorie, sorteer, q } = await searchParams
   const sortKey = (sorteer as SortKey) ?? 'aanbevolen'
   const orderBy = ORDER_BY[sortKey] ?? ORDER_BY['aanbevolen']
+  const search  = q?.trim() ?? ''
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let products: any[] = []
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let categories: any[] = []
+  let categoryParents: any[] = []
   let dbError = false
 
   try {
-    ;[products, categories] = await Promise.all([
+    ;[products, categoryParents] = await Promise.all([
       prisma.product.findMany({
         where: {
           isActive: true,
           isVisibleInShop: true,
-          ...(categorie ? { category: { slug: categorie } } : {}),
+          // When a parent category is selected, include products from its children too
+          ...(categorie ? {
+            category: {
+              OR: [
+                { slug: categorie },
+                { parent: { slug: categorie } },
+              ],
+            },
+          } : {}),
+          ...(search ? { nameNl: { contains: search, mode: 'insensitive' as const } } : {}),
         },
         include: {
           assets: { orderBy: { sortOrder: 'asc' }, take: 1 },
@@ -50,15 +60,23 @@ export default async function WebshopPage({ searchParams }: PageProps) {
         orderBy,
       }),
       prisma.category.findMany({
-        where: { isActive: true },
+        where:   { isActive: true, parentId: null },
         orderBy: { sortOrder: 'asc' },
+        include: {
+          children: {
+            where:   { isActive: true },
+            orderBy: { sortOrder: 'asc' },
+          },
+        },
       }),
     ])
   } catch {
     dbError = true
   }
 
-  const activeCategory = categories.find((c) => c.slug === categorie)
+  // Find active category label (could be parent or child)
+  const allCategories = categoryParents.flatMap((p: { nameNl: string; slug: string; children: { nameNl: string; slug: string }[] }) => [p, ...p.children])
+  const activeCategory = allCategories.find((c: { slug: string }) => c.slug === categorie)
 
   return (
     <>
@@ -84,17 +102,19 @@ export default async function WebshopPage({ searchParams }: PageProps) {
 
           {/* Filter + sort bar */}
           {!dbError && (
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
-              {categories.length > 0 && (
-                <div className="min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-10">
+              {categoryParents.length > 0 && (
+                <div className="min-w-0 flex-1">
                   <Suspense>
-                    <CategoryFilterPills categories={categories} />
+                    <CategoryFilterPills categoryParents={categoryParents} />
                   </Suspense>
                 </div>
               )}
-              <Suspense>
-                <ShopSortControl />
-              </Suspense>
+              <div className="shrink-0 self-start sm:pt-[2.75rem]">
+                <Suspense>
+                  <ShopSortControl />
+                </Suspense>
+              </div>
             </div>
           )}
 

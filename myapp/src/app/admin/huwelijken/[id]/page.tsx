@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import WeddingQrCard from '@/components/admin/WeddingQrCard'
 import WeddingPhotoGrid, { type AdminPhoto } from '@/components/admin/WeddingPhotoGrid'
 import { deleteWeddingAction, stuurAlbumAction, updateWeddingAction } from '../actions'
+import { leesOntvangers } from '@/lib/wedding/ontvangers'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,6 +34,10 @@ export default async function WeddingDetailPage({
       revealAt: true,
       isOpen: true,
       welcomeText: true,
+      extraEmails: true,
+      albumViews: true,
+      albumVisitors: true,
+      albumLastViewAt: true,
       _count: { select: { guests: true, photos: true } },
     },
   })
@@ -66,6 +71,13 @@ export default async function WeddingDetailPage({
   })
 
   const gastenMetMail = guests.filter((g) => g.email).length
+  const adressenVanGasten = new Set(
+    guests.filter((g) => g.email).map((g) => g.email!.toLowerCase()),
+  )
+  const extraOntvangers = leesOntvangers(event.extraEmails).filter(
+    (o) => !adressenVanGasten.has(o.email.toLowerCase()),
+  ).length
+  const totaalOntvangers = gastenMetMail + extraOntvangers
   // Zonder Resend-sleutel logt de mailservice iedereen als verstuurd zonder
   // dat er iets vertrekt — en slaat hij diezelfde gasten daarna voorgoed over.
   const mailIsIngesteld = Boolean(process.env.RESEND_API_KEY)
@@ -161,6 +173,24 @@ export default async function WeddingDetailPage({
             />
           </label>
 
+          <label className="block">
+            <span className="block text-sm font-medium text-gray-700 mb-1.5">
+              Extra ontvangers van de albummail
+            </span>
+            <textarea
+              name="extraEmails"
+              rows={3}
+              defaultValue={event.extraEmails.join('\n')}
+              placeholder={'Amelie <amelie@voorbeeld.be>\nfotograaf@voorbeeld.be'}
+              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-mono"
+            />
+            <span className="mt-1.5 block text-xs text-gray-400">
+              Eén per regel, voor wie geen gast is: het koppel zelf, de ouders, de fotograaf.
+              Een naam ervoor mag, maar hoeft niet. Zonder naam groet de mail neutraal.
+              Adressen die niet kloppen worden bij het opslaan weggelaten.
+            </span>
+          </label>
+
           <button
             type="submit"
             className="rounded-full bg-gray-900 px-6 py-2.5 text-sm text-white hover:bg-gray-700 transition-colors"
@@ -172,6 +202,29 @@ export default async function WeddingDetailPage({
         {/* ── Album versturen ──────────────────────────────────────────── */}
         <div className="rounded-2xl border border-gray-200 bg-white p-6">
           <h2 className="text-sm font-medium text-gray-900">Album naar de gasten sturen</h2>
+
+          <p className="mt-3 text-sm text-gray-600">
+            {event.albumViews === 0 ? (
+              'Het album is nog niet bekeken.'
+            ) : (
+              <>
+                Het album is <span className="font-medium text-gray-900">{event.albumViews}</span>{' '}
+                keer geopend door{' '}
+                <span className="font-medium text-gray-900">{event.albumVisitors}</span>{' '}
+                {event.albumVisitors === 1 ? 'persoon' : 'verschillende mensen'}.
+                {event.albumLastViewAt && (
+                  <>
+                    {' '}Laatst op{' '}
+                    {new Intl.DateTimeFormat('nl-BE', {
+                      dateStyle: 'long',
+                      timeStyle: 'short',
+                    }).format(event.albumLastViewAt)}
+                    .
+                  </>
+                )}
+              </>
+            )}
+          </p>
 
           {searchParams.mail === 'gesloten' && (
             <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
@@ -186,14 +239,17 @@ export default async function WeddingDetailPage({
               {Number(searchParams.overgeslagen) > 0 &&
                 `, ${searchParams.overgeslagen} overgeslagen (hadden hem al)`}
               {Number(searchParams.mislukt) > 0 && `, ${searchParams.mislukt} mislukt`}
-              {' '}van {searchParams.totaal} gasten met een e-mailadres.
+              {' '}van {searchParams.totaal} ontvangers.
             </p>
           )}
 
           <p className="mt-3 text-sm text-gray-600">
-            {gastenMetMail === 0
-              ? 'Geen enkele gast heeft een e-mailadres achtergelaten. Deel het album dan via de link of de QR-code.'
-              : `${gastenMetMail} van de ${guests.length} gasten liet een e-mailadres achter.`}
+            {totaalOntvangers === 0
+              ? 'Nog geen ontvangers. Geen enkele gast liet een adres achter en er staan geen extra ontvangers. Deel het album dan via de link of de QR-code.'
+              : `${gastenMetMail} van de ${guests.length} gasten liet een e-mailadres achter` +
+                (extraOntvangers > 0
+                  ? `, plus ${extraOntvangers} extra ontvanger${extraOntvangers === 1 ? '' : 's'}.`
+                  : '.')}
           </p>
 
           <p className="mt-1.5 text-xs text-gray-400">
@@ -214,10 +270,10 @@ export default async function WeddingDetailPage({
             <input type="hidden" name="id" value={event.id} />
             <button
               type="submit"
-              disabled={gastenMetMail === 0 || !mailIsIngesteld}
+              disabled={totaalOntvangers === 0 || !mailIsIngesteld}
               className="rounded-full bg-gray-900 px-6 py-2.5 text-sm text-white hover:bg-gray-700 transition-colors disabled:opacity-40"
             >
-              Stuur het album naar {gastenMetMail} gasten
+              Stuur het album naar {totaalOntvangers} ontvangers
             </button>
           </form>
         </div>

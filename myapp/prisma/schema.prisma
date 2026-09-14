@@ -540,6 +540,17 @@ model WeddingEvent {
   isOpen      Boolean   @default(true)
   /// Vrije tekst onderaan het check-in scherm (AVG-melding, uitleg)
   welcomeText String?
+  /// Extra ontvangers van de albummail die geen gast zijn: het koppel zelf,
+  /// de ouders, de fotograaf. Eén per regel, met of zonder naam ervoor:
+  ///   Amelie <amelie@voorbeeld.be>
+  ///   fotograaf@voorbeeld.be
+  extraEmails String[] @default([])
+
+  /// Hoe vaak het album geopend is, en door hoeveel verschillende toestellen.
+  /// Het tweede cijfer zegt meer: het eerste loopt op bij elke verversing.
+  albumViews     Int       @default(0)
+  albumVisitors  Int       @default(0)
+  albumLastViewAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
